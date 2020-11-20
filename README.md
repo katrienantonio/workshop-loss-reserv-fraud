@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud* course in November 2020.
 
-📆 November 25, 26 and 27, 2020 <br> 🕞 From 9.30 am to 12.30 pm <br> 📍
+📆 November 25, 26 and 27, 2020 <br> 🕖 From 9.30 am to 12.30 pm <br> 📍
 online
 
 Course materials will be posted in the days before the workshop.
@@ -16,25 +16,25 @@ Course materials will be posted in the days before the workshop.
 <p text-align="justify">
 
 This three-half-day workshop introduces the *essential concepts of
-building insurance loss models with R*. On the first half-day, you will
-gain insights in the foundations of handling loss data, including useful
-*data wrangling and visualization steps*. You will cover a variety of
-*discrete and continuous loss distributions*, and techniques to build
-more flexible distributions from standard distributions (by mixing and
-splicing). You will learn how to fit these models to actual data and
-inspect their goodness-of-fit. Then, you will use the fitted model to
-estimate risk measures. The second half-day then puts focus on reserving
-analytics. Starting from a granular data set with the development of
-individual claims, you will learn how to get useful insights from the
-data. Step-by-step you will move from the granular data to aggregated
-data in a run-off triangle. You will fit the famous chain ladder method
-and examing its validity on the given data. Alternative modelling
-strategies based on recent research will be discussed. The third
-half-day then covers challenges in building fraud detection models from
-tabular and networked data. You will acquire insights in the foundations
-of these analytic methods, learn how to set-up the model building
-process, and focus on building a good understanding of the resulting
-model output and predictions.
+building insurance loss models with R*. On the **first half-day**, you
+will gain insights in the foundations of handling **loss data**,
+including useful *data wrangling and visualization steps*. You will
+cover a variety of *discrete and continuous loss distributions*, and
+techniques to build more flexible distributions from standard
+distributions (by mixing and splicing). You will learn how to fit these
+models to actual data and inspect their goodness-of-fit. Then, you will
+use the fitted model to estimate risk measures. The **second half-day**
+then puts focus on **reserving** analytics. Starting from a granular
+data set with the development of individual claims, you will learn how
+to get useful insights from the data. Step-by-step you will move from
+the granular data to aggregated data in a run-off triangle. You will fit
+the famous chain ladder method and examine its validity on the given
+data. Alternative modelling strategies based on recent research will be
+discussed. The **third half-day** then covers challenges in building
+**fraud** detection models from tabular and networked data. You will
+acquire insights in the foundations of these analytic methods, learn how
+to set-up the model building process, and focus on building a good
+understanding of the resulting model output and predictions.
 
 </p>
 
@@ -65,12 +65,12 @@ The detailed schedule is subject to small changes.
 |         | 10.45 - 11.20 | Claims reserving with triangles                                    |                                                                                                                                                                                                                                              |          |
 |         | 11.30 - 12.10 | When the chain ladder method fails                                 |                                                                                                                                                                                                                                              |          |
 |         | 12.10 - 12.30 | Research outlook                                                   |                                                                                                                                                                                                                                              |          |
-|  Day 3  | 09.30 - 10    | Motivation and fraud detection cycle                               |                                                                                                                                                                                                                                              |          |
-|         | 10 - 10.20    | Network and tabular data                                           |                                                                                                                                                                                                                                              |          |
-|         | 10.30 - 11    | Ranking algorithm                                                  |                                                                                                                                                                                                                                              |          |
-|         | 11 - 11.20    | Featurization                                                      |                                                                                                                                                                                                                                              |          |
-|         | 11.30 - 12    | Supervised learning with imbalanced data                           |                                                                                                                                                                                                                                              |          |
-|         | 12 - 12.20    | Evaluation metrics                                                 |                                                                                                                                                                                                                                              |          |
+|  Day 3  | 09.30 - 10.00 | Motivation and fraud detection cycle                               |                                                                                                                                                                                                                                              |          |
+|         | 10.00 - 10.20 | Network and tabular data                                           |                                                                                                                                                                                                                                              |          |
+|         | 10.30 - 11.00 | Ranking algorithm                                                  |                                                                                                                                                                                                                                              |          |
+|         | 11.00 - 11.20 | Featurization                                                      |                                                                                                                                                                                                                                              |          |
+|         | 11.30 - 12.00 | Supervised learning with imbalanced data                           |                                                                                                                                                                                                                                              |          |
+|         | 12.00 - 12.20 | Evaluation metrics                                                 |                                                                                                                                                                                                                                              |          |
 |         | 12.20 - 12.30 | Wrap-up                                                            |                                                                                                                                                                                                                                              |          |
 
 ##### Half-day 1: Loss modelling analytics
