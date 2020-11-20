@@ -1,0 +1,17 @@
+base
+knitr
+tidyverse
+ggplot2
+tibble
+tidyr
+readr
+purrr
+dplyr
+stringr
+forcats
+fontawesome
+DiagrammeR
+emo
+gt
+countdown
+here

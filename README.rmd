@@ -43,23 +43,25 @@ You will acquire insights in the foundations of these analytic methods, learn ho
 The detailed schedule is subject to small changes. 
 
 | Session | Duration      | Description | Lecture material | R script | 
-|:-------:|-----------|-------------|------|------|------|
-| Day 0 | your own pace | Prework | [sheets prework](https://katrienantonio.github.io/workshop-ML/sheets/day_1/lecture_sheets_workshop_ML_Day_1.html#prologue) |
+|:-------:|-----------|-------------|------|------|
+| Day 0 | your own pace | Prework | sheets prework in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.html) and in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.pdf)|  
 | Day 1   | 09.30 - 09.45 | Prologue | | 
 |         | 09.45 - 10.20 | Data sets | | 
 |         | 10.30 - 11.20 | Frequency models | |
 |         | 11.30 - 12.30 | Severity models | |
-| Day 2   | 09.30 - 09.30 | Set-up | |[script](https://katrienantonio.github.io/workshop-ML/scripts/day_2/0_setup.R)|
-|  | 09.30 - 11.00 | Trees | [sheets trees](https://katrienantonio.github.io/workshop-ML/sheets/day_2/lecture_sheets_workshop_ML_Day_2.html#trees) |[script](https://katrienantonio.github.io/workshop-ML/scripts/day_2/1_decision_tree.R)|[solutions](https://katrienantonio.github.io/workshop-ML/scripts/day_2/1_decision_tree_solutions.R)|
-|         | 11.15 - 12.30 | Bagging and random forests | [sheets bagging and random forests](https://katrienantonio.github.io/workshop-ML/sheets/day_2/lecture_sheets_workshop_ML_Day_2.html#bag_rf)|[script](https://katrienantonio.github.io/workshop-ML/scripts/day_2/2_bagging_randomforest.R)|[solutions](https://katrienantonio.github.io/workshop-ML/scripts/day_2/2_bagging_randomforest_solutions.R)|
-|         | 13.30 - 15.00 | Gradient boosting machine | [sheets gbm](https://katrienantonio.github.io/workshop-ML/sheets/day_2/lecture_sheets_workshop_ML_Day_2.html#gbm)|[script](https://katrienantonio.github.io/workshop-ML/scripts/day_2/3_gbm_xgboost.R)|[solutions](https://katrienantonio.github.io/workshop-ML/scripts/day_2/3_gbm_xgboost_solutions.R)|
-|         | 15.15 - 16.30 | h2o | [sheets h2o](https://katrienantonio.github.io/workshop-ML/sheets/day_2/lecture_sheets_workshop_ML_Day_2.html#h2o)|[script](https://katrienantonio.github.io/workshop-ML/scripts/day_2/4_h2o.R)|[solutions](https://katrienantonio.github.io/workshop-ML/scripts/day_2/4_h2o_solutions.R)|
-| Day 3   | 09.30 -  | Neural networks introduction | [sheets intro](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#introduction) |  |
-|         | 10.00 - 11.00 | Fundamentals of neural networks | [sheets fundamentals](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#fundamentals)|[script](https://katrienantonio.github.io/workshop-ML/scripts/day_3/Neural networks.R)|[solutions](https://katrienantonio.github.io/workshop-ML/scripts/day_3/Neural networks solutions.R)|
-|         | 11.15 - 11.45 | More on fundamentals | [sheets fundamentals](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#fundamentals)| | |
-|         | 11.45 - 12.30 | Autoencoders | [sheets autoencoders](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#autoencoder)| | |
-|         | 13.30 - 15.00 | CNNs | [sheets CNNs](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#cnn)| | |
-|         | 15.15 - 16.30 | Regression | [sheets regression](https://katrienantonio.github.io/workshop-ML/sheets/day_3/lecture_sheets_workshop_ML_Day_3.html#regression)| | |
+| Day 2   | 09.30 - 09.50 | Motivation and strategies | |
+|         | 09.50 - 10.20 | Reserving data structures (part 1): daily and yearly data | |
+|         | 10.30 - 10.45 | Reserving data structures (part 2): individual and aggregated data | |
+|         | 10.45 - 11.20 | Claims reserving with triangles | | 
+|         | 11.30 - 12.10 | When the chain ladder method fails | |
+|         | 12.10 - 12.30 | Research outlook  |  |
+| Day 3   | 09.30 - 10  | Motivation and fraud detection cycle | |
+|         | 10 - 10.20 | Network and tabular data | |
+|         | 10.30 - 11 | Ranking algorithm |  |
+|         | 11 - 11.20 | Featurization | |
+|         | 11.30 - 12 | Supervised learning with imbalanced data | |
+|         | 12 - 12.20 | Evaluation metrics | |
+|         | 12.20 - 12.30 | Wrap-up | |
 
 ##### Half-day 1: Loss modelling analytics
 
@@ -70,22 +72,33 @@ Topics include:
 - building frequency models: Poisson, Negative Binomial, ZI and Hurdle, maximum likelihood estimation and goodness-of-fit
 - building severity models: simple to complex parametric distributions, splicing to construct a global fit, mixing, estimate a risk measure.
 
-Download lecture sheets in [pdf](). 
+Download lecture sheets TBC.
 
 ##### Half-day 2: Claims reserving analytics
 
 Topics include: 
 
-- 
+- data sets used in the course: individual claims, daily data
+- data handling and visualization tools with {ggplot} and {dplyr}
+- from daily to yearly data, from individual claims to triangles
+- fitting well known claims reserving methods
+- when the simple methods fail: what else is there?
 
-Download lecture sheets in [pdf](). 
+Download lecture sheets TBC.
 
 ##### Half-day 3: Insurance fraud analytics
 
 Topics include: 
 
-
+- insurance fraud detection strategies and numbers
+- network and tabular data 
+- ranking algorithms, e.g. PageRank, BiRank
+- network featurization steps
+- supervised learning with imbalanced data, sampling methods like SMOTE
+- evaluation metrics, eg AUROC, AUPR, top decile lift
 - wrap up.
+
+Download lecture sheets TBC.
 
 ## After the workshop: want to more know?
 
@@ -95,53 +108,52 @@ An excellent collection of tutorials, books, workshops, events is available via
 
 ## Prework
 
-<p align="justify">The workshop requires a basic understanding of R. We prepared some prework sheets that you can take a look at before the workshop. Yet another good starting level is the material covered in the [1-Basic](https://github.com/katrienantonio/workshop-R/tree/master/1%20-%20Basic%20R) folder of the [Programming in R](https://github.com/katrienantonio/workshop-R) workshop taught at Nationale Nederlanden in June 2019.</p>
+<p align="justify">The workshop requires a basic understanding of R. We prepared some prework sheets that you can take a look at before the workshop ([html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.html) or [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.pdf)). Yet another good starting level is the material covered in the [1-Basic](https://github.com/katrienantonio/workshop-R/tree/master/1%20-%20Basic%20R) folder of the [Programming in R](https://github.com/katrienantonio/workshop-R) workshop taught at Nationale Nederlanden in June 2019.</p>
 
-Familiarity with statistical or machine learning methods is *not* required. The workshop gradually builds up these concepts, with an emphasis on hands-on demonstrations and exercises.
+Being familiar with statistical or machine learning methods is *not* required. The workshop gradually builds up these concepts, with an emphasis on hands-on demonstrations and exercises.
 
 ## Software Requirements
 
+You have two options to join the coding exercises covered during the workshop. Either you join the RStudio cloud workspace dedicated to the workshop, and then you'll run R in the cloud, from your browser. Or you use your local installation of R and RStudio.
+
+### R Studio Cloud
+
+If you prefer not to work with a local installation of R (and the necessary packages), you can join our workspace on R Studio Cloud. This should be a very accessible set-up for working with R in the cloud for the less experienced user!
+
+[https://rstudio.cloud/spaces/106312/join?access_code=g0TatB6C38IBSJ587PAhr7p8eRSQgrkd4ks2Z8i4](https://rstudio.cloud/spaces/106312/join?access_code=g0TatB6C38IBSJ587PAhr7p8eRSQgrkd4ks2Z8i4) 
+
+After creating an account for RStudio you will be able to work with the scripts and data sets in the cloud. We will have everything set up for you in the correct way. You only have to login!
+
+### Local installation
+
 Please bring a laptop with a recent version of R and RStudio installed. Make sure you can connect your laptop to the internet (or download the course material one day before the start of the workshop). You will need:
 
-- R (at least 3.5.2 <https://cloud.r-project.org/bin/windows/base/> )
-- RStudio ( <https://www.rstudio.com/products/rstudio/download/#download> )
+- R (at least 3.5.2 <https://cloud.r-project.org/bin/windows/base/>)
+- RStudio (<https://www.rstudio.com/products/rstudio/download/#download>)
 
-You will now go through three steps: (1) installing packages, (2) installing h2o interface and (3) installing keras interface. The instructions are also stored as an R script in the [scripts](https://github.com/katrienantonio/workshop-ML/tree/master/scripts) folder.  
+Please run the following script in your R session to install the required packages
 
-**Step 1**: run the following script in your R session to install the required packages
-
-```{r packages, eval = FALSE}
-packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmodels")
+```{r}
+packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "DMwR", "pROC", "ChainLadder", "lubridate")
 new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 
-all_packages <- c()
-
-if(sum(!(all_packages %in% installed.packages()[, "Package"]))) {
+if(sum(!(packages %in% installed.packages()[, "Package"]))) {
   stop(paste('The following required packages are not installed:\n', 
-          paste(all_packages[which(!(all_packages %in% installed.packages()[, "Package"]))], collapse = ', ')));
+             paste(packages[which(!(packages %in% installed.packages()[, "Package"]))], collapse = ', ')));
 } else {
   message("Everything is set up correctly. You are ready to go.")
 }
 ```
 
 
-## R Studio Cloud
-
-If you prefer not to work with a local installation of R (and the necessary packages), you can join our workspace on R Studio Cloud dedicated to the workshop is 
-
-
-
-After creating an account for RStudio you will be able to work with the scripts and data sets in the cloud. We will have everything set up for you in the correct way. You only have to login!
-
-
 ## Instructors
 
-<img src="img/Katrien.jpg" width="110"/> 
+<img src="image/Katrien.jpg" width="110"/> 
 
 <p align="justify">[Katrien Antonio](https://katrienantonio.github.io/) is professor in insurance data science at KU Leuven and associate professor at University of Amsterdam. She teaches courses on data science for insurance, life and non-life insurance mathematics and loss models. Research-wise Katrien puts focus on pricing, reserving and fraud analytics, as well as mortality dynamics. Katrien will teach Day 1 of the workshop, and serve as TA on Day 2 and 3.</p>
 
-<p align="justify">*Jonas Crevecoeur* is XXX. He holds the degrees of MSc in Mathematics, MSc in Insurance Studies and MSc in Financial and Actuarial Engineering (KU Leuven). Before starting the PhD program he worked as an intern with QBE Re (Belgium office) where he studied multiline products and copulas. Jonas was a PhD fellow of the Research Foundation - Flanders (FWO, PhD fellowship fundamental research).</p> 
+<p align="justify">*Jonas Crevecoeur* is a post-doctoral researcher in biostatistics at KU Leuven. He recently obtained his PhD within the insurance research group at KU Leuven and holds the degrees of MSc in Mathematics, MSc in Insurance Studies and MSc in Financial and Actuarial Engineering (KU Leuven). Before starting the PhD program he worked as an intern with QBE Re (Belgium office) where he studied multiline products and copulas. Jonas was a PhD fellow of the Research Foundation - Flanders (FWO, PhD fellowship fundamental research).</p> 
 
 Happy learning!
 

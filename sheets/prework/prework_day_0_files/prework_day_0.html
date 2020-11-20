@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Loss modelling, reserving and fraud analytics in R - Prework</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Katrien Antonio &amp; Jonas Crevecoeur" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/metropolis.css" type="text/css" />
+    <link rel="stylesheet" href="css/metropolis-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="css/my-css.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Loss modelling, reserving and fraud analytics in R - Prework
+## A hands-on workshop
+<html>
+<div style="float:left">
+
+</div>
+<hr align='center' color='#116E8A' size=1px width=97%>
+</html>
+### Katrien Antonio &amp; Jonas Crevecoeur
+### <a href="https://www.github.com/katrienantonio/workshop-loss-reserv-fraud-2020">Arcturus 2020 workshop</a> | November 25-27, 2020
+
+---
+
+
+
+
+
+
+class: inverse, center, middle
+name: prologue
+
+# Prologue
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#FAFAFA' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+name: introduction
+
+# Introduction
+
+### Course
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud-2020
+
+The course repo on GitHub, where you can find the data sets, lecture sheets, R scripts and R markdown files.
+
+--
+
+### Us
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 512 512"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt; [https://katrienantonio.github.io/](https://katrienantonio.github.io/) and [https://jonascrevecoeur.github.io/](https://jonascrevecoeur.github.io/)
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 512 512"&gt;&lt;path d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"/&gt;&lt;/svg&gt; [katrien.antonio@kuleuven.be](mailto:katrien.antonio@kuleuven.be) &amp; [jonas.crevecoeur@kuleuven.be](mailto:jonas.crevecoeur@kuleuven.be) 
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 640 512"&gt;&lt;path d="M622.34 153.2L343.4 67.5c-15.2-4.67-31.6-4.67-46.79 0L17.66 153.2c-23.54 7.23-23.54 38.36 0 45.59l48.63 14.94c-10.67 13.19-17.23 29.28-17.88 46.9C38.78 266.15 32 276.11 32 288c0 10.78 5.68 19.85 13.86 25.65L20.33 428.53C18.11 438.52 25.71 448 35.94 448h56.11c10.24 0 17.84-9.48 15.62-19.47L82.14 313.65C90.32 307.85 96 298.78 96 288c0-11.57-6.47-21.25-15.66-26.87.76-15.02 8.44-28.3 20.69-36.72L296.6 284.5c9.06 2.78 26.44 6.25 46.79 0l278.95-85.7c23.55-7.24 23.55-38.36 0-45.6zM352.79 315.09c-28.53 8.76-52.84 3.92-65.59 0l-145.02-44.55L128 384c0 35.35 85.96 64 192 64s192-28.65 192-64l-14.18-113.47-145.03 44.56z"/&gt;&lt;/svg&gt; (Katrien, PhD) Professor in insurance data science at KU Leuven and University of Amsterdam 
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 640 512"&gt;&lt;path d="M622.34 153.2L343.4 67.5c-15.2-4.67-31.6-4.67-46.79 0L17.66 153.2c-23.54 7.23-23.54 38.36 0 45.59l48.63 14.94c-10.67 13.19-17.23 29.28-17.88 46.9C38.78 266.15 32 276.11 32 288c0 10.78 5.68 19.85 13.86 25.65L20.33 428.53C18.11 438.52 25.71 448 35.94 448h56.11c10.24 0 17.84-9.48 15.62-19.47L82.14 313.65C90.32 307.85 96 298.78 96 288c0-11.57-6.47-21.25-15.66-26.87.76-15.02 8.44-28.3 20.69-36.72L296.6 284.5c9.06 2.78 26.44 6.25 46.79 0l278.95-85.7c23.55-7.24 23.55-38.36 0-45.6zM352.79 315.09c-28.53 8.76-52.84 3.92-65.59 0l-145.02-44.55L128 384c0 35.35 85.96 64 192 64s192-28.65 192-64l-14.18-113.47-145.03 44.56z"/&gt;&lt;/svg&gt; (Jonas, PhD) Post-doctoral researcher in biostatistics at KU Leuven.
+
+---
+
+name: checklist
+
+# Checklist
+
+☑ Do you have a fairly recent version of R?
+  
+  ```r
+  version$version.string
+  ## [1] "R version 4.0.3 (2020-10-10)"
+  ```
+
+☑ Do you have a fairly recent version of RStudio? 
+  
+  ```r
+  RStudio.Version()$version
+  ## Requires an interactive session but should return something like "[1] ‘1.3.1093’"
+  ```
+
+☑ Have you installed the R packages listed in the software requirements? 
+
+or
+
+☑ Have you created an account on RStudio Cloud (to avoid any local installation issues)?
+  
+---
+
+class: inverse, center, middle
+name: universe
+
+# What's out there - the R universe
+
+---
+
+# What is R?
+
+&gt; &lt;font size="+2"&gt; &lt;p align="justify"&gt;The R environment is an integrated suite of software facilities for data manipulation, calculation and graphical display.&lt;/p&gt;&lt;/font&gt;
+
+--
+
+&lt;/br&gt;
+
+A brief history:
+
+- R is a dialect of the S language. 
+
+--
+
+- R was written by .KULbginline[R]obert Gentleman and .KULbginline[R]oss Ihaka in 1992. 
+
+--
+
+- The R source code was first released in 1995.
+
+--
+
+- In 1998, the Comprehensive R Archive Network [CRAN](http://CRAN.R-project.org/) was established.
+
+--
+
+- The first official release, R version 1.0.0, dates to 2000-02-29. Currently R 4.0.3 (October, 2020).
+
+--
+
+- R is open source via the [GNU General Public License](https://en.wikipedia.org/wiki/GNU_General_Public_License).
+
+
+---
+
+# Explore the R architecture
+
+- R is like a car's engine
+
+- RStudio is like a car's dashboard, an integrated development environment (IDE) for R.
+
+
+R: Engine            |  RStudio: Dashboard
+:-------------------------:|:-------------------------:
+&lt;img src="image/engine.jpg" alt="Drawing" style="height: 300px;"/&gt;  |  &lt;img src="image/dashboard.jpg" alt="Drawing" style="height: 300px;"/&gt;
+
+---
+
+# How do I code in R?
+
+Keep in mind:
+
+- unlike other software like Excel, STATA, or SAS, R is an interpreted language
+
+- no point and click in R!
+
+- .KULbginline[you have to program in R]!
+
+R .KULbginline[packages] extend the functionality of R by providing additional functions, and can be downloaded for free from the internet.
+
+R: A new phone           |  R Packages: Apps you can download
+:-------------------------:|:-------------------------:
+&lt;img src="image/iphone.jpg" alt="Drawing" style="height: 150px;"/&gt;  |  &lt;img src="image/apps.jpg" alt="Drawing" style="height: 150px;"/&gt;
+
+---
+
+# How to install and load an R package?
+
+.pull-left[
+
+Install the {ggplot2} package for data visualisation
+
+
+```r
+install.packages("ggplot2")
+```
+
+Load the installed package
+
+
+```r
+library(ggplot2)
+```
+
+And give it a try
+
+
+```r
+head(diamonds)
+ggplot(diamonds, aes(clarity, fill = cut)) + 
+  geom_bar() + theme_bw()
+```
+
+Packages are developed and maintained by R users worldwide. 
+
+They are shared with the R community through CRAN: now 16,460 packages online (on November 2, 2020)!
+
+]
+
+
+.pull-right[
+
+&lt;img src="prework_day_0_files/figure-html/try_ggplot_plot-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+
+]
+
+---
+
+# Why R and RStudio? 
+
+### Data science positivism
+
+- Next to Python, R has become the *de facto* language for data science, with a cutting edge *machine learning toolbox*.
+- See: [The Popularity of Data Science Software](http://r4stats.com/articles/popularity/)
+- R is open-source with a very active community of users spanning academia and industry.
+
+--
+
+### Bridge to actuarial science, econometrics and other tools
+
+- R has all of the statistics and econometrics support, and is amazingly adaptable as a “glue” language to other programming languages and APIs.
+- R does not try to be everything to everyone. The RStudio IDE and ecosystem allow for further, seemless integration (with e.g. python, keras, tensorflow or C).
+- Widely used in actuarial undergraduate programs 
+
+--
+
+### Disclaimer + Read more
+
+- It's also the language that we know best.
+- If you want to read more: [R-vs-Python](https://blog.rstudio.com/2019/12/17/r-vs-python-what-s-the-best-for-language-for-data-science/), [when to use Python or R](https://www.datacamp.com/community/blog/when-to-use-python-or-r) or [Hadley Wickham on the future of R](https://qz.com/1661487/hadley-wickham-on-the-future-of-r-python-and-the-tidyverse/)
+
+---
+
+class: clear, center, middle
+
+background-image: url("image/tidyverse2.1.png")
+background-size: cover
+background-size: 65% 
+background-position: center
+
+---
+
+# Welcome to the tidyverse!
+
+&gt;&lt;p align="justify"&gt;The .KULbginline[tidyverse] is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. &lt;/p&gt;
+
+&lt;center&gt;
+&lt;img src="image/tidyverse_wide.png" width="750"/&gt;
+&lt;/center&gt;
+
+More on: [tidyverse](https://www.tidyverse.org).
+
+Install the packages with `install.packages("tidyverse")`. Then run `library(tidyverse)` to load the core tidyverse.
+
+---
+
+# Principles of tidy data
+
+Three interrelated rules from the [R for data science](https://r4ds.had.co.nz/) book by Garrett Grolemund and Hadley Wickham:
+
+1. Each variable must have its own column.
+2. Each observation must have its own row.
+3. Each value must have its own cell.
+
+&lt;center&gt;
+&lt;img src="image/tidy_data.png" width="750"/&gt;
+&lt;/center&gt;
+
+.footnote[This figure is taken from Chapter 12 on Tidy data in [R for data science](https://r4ds.had.co.nz/).]
+
+---
+
+# Workflow of a data scientist
+
+Here is a model of the .hi-pink[tools needed in a typical data science project]: 
+
+&gt; &lt;p align="justify"&gt; Together, tidying and transforming are called &lt;b&gt;wrangling&lt;/b&gt;, because getting your data in a form that’s natural to work with often feels like a fight! &lt;/p&gt;
+
+&gt; &lt;p align="justify"&gt; Models are complementary tools to visualisation. Once you have made your questions sufficiently precise, you can use a model to answer them. Models are a fundamentally &lt;b&gt;mathematical or computational tool&lt;/b&gt;, so they generally scale well. But every model makes &lt;b&gt;assumptions&lt;/b&gt;, and by its very nature a model cannot question its own assumptions. That means &lt;b&gt;a model cannot fundamentally surprise you&lt;/b&gt;.&lt;/p&gt;
+
+&lt;center&gt;
+&lt;img src="image/data_science_pipeline.png" width="600"/&gt;
+&lt;/center&gt;
+
+.footnote[Figure and quote taken from Chapter 1 in [R for data science](https://r4ds.had.co.nz/).]
+
+---
+
+class: inverse, center, middle
+name: wrangling
+
+# Data wrangling and visualisation 
+
+---
+
+# A tibble instead of a data.frame &lt;img src="image/tibble.png" class="title-hex"&gt; 
+
+Within the tidyverse `tibble` is a modern take on a `data.frame`:
+
+- keep the features that have stood the test of time
+
+- drop the features that used to be convenient but are now frustrating. 
+
+--
+
+You can use: 
+
+- `tibble()` to create a new tibble
+
+- `as_tibble()` transforms an object (e.g. a data frame) into a tibble.
+
+--
+
+Quick example: explore the differences!
+
+
+```r
+mtcars
+# install.packages("tidyverse")
+library(tidyverse)
+as_tibble(mtcars)
+```
+
+---
+
+# Chains with the pipe operator &lt;img src="image/pipe.png" class="title-hex"&gt;
+
+In R, the pipe operator is `%&gt;%`. 
+
+It takes the output of one statement and makes it the input of the next statement. 
+
+When describing it, you can think of it as a “THEN”; with this operator it becomes easy to chain a sequence of calculations. 
+
+For example, when you have an input data and want to call functions `foo` and `bar` in sequence, you can write `data %&gt;% foo %&gt;% bar`.
+
+--
+
+A first example: 
+
+- take the `diamonds` data (from the {ggplot2} package)
+
+- then subset
+
+
+```r
+diamonds %&gt;% filter(cut == "Ideal")
+```
+
+--
+
+Some excellent blog posts about this operator: [Pipes in R tutorial for beginners](https://www.datacamp.com/community/tutorials/pipe-r-tutorial) and [how to write this in base R](https://gist.github.com/hadley/c430501804349d382ce90754936ab8ec).
+
+---
+
+# Data manipulation verbs &lt;img src="image/dplyr.png" class="title-hex"&gt;
+
+The {dplyr} package holds many useful data manipulation verbs:
+
+- `mutate()` adds new variables that are functions of existing variables
+
+- `select()` picks variables based on their names
+
+- `filter()` picks cases based on their values
+
+- `summarise()` reduces multiple values down to a single summary
+
+- `arrange()` changes the ordering of the rows.
+
+These all combine naturally with `group_by()` which allows you to perform any operation “by group”.
+
+--
+
+A first example: 
+
+
+```r
+diamonds %&gt;% mutate(price_per_carat = price/carat) %&gt;% filter(price_per_carat &gt; 1500)
+```
+
+or
+
+
+```r
+diamonds %&gt;% group_by(cut) %&gt;% summarize(price = mean(price), carat = mean(carat))
+```
+
+---
+
+name: yourturn-tidyverse
+class: clear
+
+.left-column[
+
+&lt;!-- Add icon library --&gt;
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"&gt;
+
+## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
+
+
+]
+
+.right-column[
+
+To get warmed up, let's do some .KULbginline[basic explorations] of the {tidyverse} instructions. The idea is to get some feel for these functions.
+
+Your starting point are the instructions in the R script on XXX from the [course material](https://github.com/katrienantonio) (TBC). 
+
+.hi-pink[Q]: you will work through the following exploratory steps.
+
+1.1. Create a data frame (with `data.frame(.)`) or tibble (with `tibble(.)`) `df` with two variables `x` and `y`. Enter some values for these variables. 
+
+1.2. Create a new variable `z` that is the sum of `x` and `y`. Use `base` R instructions and then use the pipe operator and `mutate(.)`.
+
+2.1. Create a new data vector `v` with some entries, use `c(.)`.
+
+2.2. Try the following instructions: 
+
+
+```r
+round(mean(x), 2)
+mean(x) %&gt;% round(2)
+x %&gt;% mean %&gt;% round(2)
+```
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+First, you put together the `data.frame`
+
+
+```r
+df &lt;- data.frame(x = c(0, 1), y = c(0, 1))
+df 
+```
+
+or the `tibble`
+
+
+```r
+df &lt;- tibble(x = c(0, 1), y = c(0, 1))
+df 
+```
+
+Next, you create a new variable
+
+
+```r
+df$z &lt;- df$x + df$y 
+df
+```
+
+or with `mutate(.)`
+
+
+```r
+df %&gt;% mutate(z = x+y)
+df
+```
+
+]
+
+.pull-right[
+
+You create a vector `x` with some entries
+
+
+```r
+x &lt;- c(0.157, 0.135, 0.359)
+```
+
+and then you evaluate
+
+
+```r
+round(mean(x), 2)
+mean(x) %&gt;% round(2)
+x %&gt;% mean %&gt;% round(2)
+```
+
+These implementations all lead to the same result:
+
+
+```
+## [1] 0.22
+```
+
+Which one do you find most intuitive?
+
+]
+
+
+---
+
+# Plots with ggplot2 &lt;img src="image/ggplot2.png" class="title-hex"&gt;
+
+The aim of the {ggplot2} package is to create elegant data visualisations using the .hi-pink[grammar of graphics]. 
+
+--
+
+Here are the basic steps:
+
+- begin a plot with the function `ggplot()` creating a coordinate system that you can add layers to
+
+- the first argument of `ggplot()` is the dataset to use in the graph
+
+--
+
+A first example
+
+
+```r
+library(ggplot2)
+ggplot(data = mpg)
+ggplot(mpg)
+```
+
+creates an empty graph.
+
+You will now add layers to this graph!
+
+---
+
+# Plots with ggplot2 &lt;img src="image/ggplot2.png" class="title-hex"&gt;
+
+You complete your graph by adding one or more .hi-pink[layers] to `ggplot()`. 
+
+--
+
+For example: 
+
+- `geom_point()` adds a layer of points to your plot, which creates a scatterplot
+
+- `geom_smooth()` adds a smooth line
+
+- `geom_bar` a bar plot
+
+and many more, see [ggplot2 documentation](https://ggplot2.tidyverse.org/).
+
+--
+
+Each `geom` function in `ggplot2` takes an aesthetic mapping argument: 
+
+- maps variables in your dataset to visual properties
+
+- always paired with `aes()` and the `\(x\)` and `\(y\)` arguments of `aes()` specify which variables to map to the `\(x\)` and `\(y\)` axes.
+
+---
+
+class: clear
+
+.pull-left[
+
+
+```r
+library(ggplot2)
+ggplot(mpg, `aes(displ, hwy, colour = class)`) + 
+  `geom_point()` + `theme_bw()`
+
+```
+
+&lt;img src="prework_day_0_files/figure-html/unnamed-chunk-17-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+  
+Extend the empty graph now with (here: global) aesthetic mapping argument `aes(displ, hwy, colour = class)`.
+
+This implies: `displ` on the x-axis, `hwy` on the y-axis and `class` to differentiate the color of the plotting symbol. 
+
+With `geom_point` you add a layer of points to the empty graph.
+
+`theme_bw()` changes the `ggtheme` to a simple black-and-white theme.
+
+]
+
+
+---
+
+# What else is there? 
+
+Recall 
+
+&gt;&lt;p align="justify"&gt;The .KULbginline[tidyverse] is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. &lt;/p&gt;
+
+There are .KULbginline[(multiple) alternative ways] to do what the packages and functions in the tidyverse do. 
+
+For instance: 
+
+- base R
+- the {data.table} package
+
+You can read more about comparisons on e.g. [how to write this in base R](https://gist.github.com/hadley/c430501804349d382ce90754936ab8ec) or [Base R, the tidyverse, and data.table: a comparison of R dialects to wrangle your data](https://wetlandscapes.com/blog/a-comparison-of-r-dialects/).
+
+---
+
+# Thanks!  &lt;img src="image/xaringan.png" class="title-hex"&gt;
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+Slides created with the R package [xaringan](https://github.com/yihui/xaringan).
+&lt;br&gt; &lt;br&gt; &lt;br&gt;
+Course material available via 
+&lt;br&gt;
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud-2020
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightLanguage": "R",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"highlightSpans": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
