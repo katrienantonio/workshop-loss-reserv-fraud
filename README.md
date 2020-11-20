@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud* course in November 2020.
 
-📆 November 25, 26 and 27, 2020 <br> 🕖 From 9.30 am to 12.30 pm <br> 📍
+📆 November 25, 26 and 27, 2020 <br> ⏱ From 9.30 am to 12.30 pm <br> 📌
 online
 
 Course materials will be posted in the days before the workshop.
@@ -200,8 +200,7 @@ insurance data science at KU Leuven and associate professor at
 University of Amsterdam. She teaches courses on data science for
 insurance, life and non-life insurance mathematics and loss models.
 Research-wise Katrien puts focus on pricing, reserving and fraud
-analytics, as well as mortality dynamics. Katrien will teach Day 1 of
-the workshop, and serve as TA on Day 2 and 3.
+analytics, as well as mortality dynamics.
 
 </p>
 

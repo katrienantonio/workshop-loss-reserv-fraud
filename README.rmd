@@ -151,7 +151,7 @@ if(sum(!(packages %in% installed.packages()[, "Package"]))) {
 
 <img src="image/Katrien.jpg" width="110"/> 
 
-<p align="justify">[Katrien Antonio](https://katrienantonio.github.io/) is professor in insurance data science at KU Leuven and associate professor at University of Amsterdam. She teaches courses on data science for insurance, life and non-life insurance mathematics and loss models. Research-wise Katrien puts focus on pricing, reserving and fraud analytics, as well as mortality dynamics. Katrien will teach Day 1 of the workshop, and serve as TA on Day 2 and 3.</p>
+<p align="justify">[Katrien Antonio](https://katrienantonio.github.io/) is professor in insurance data science at KU Leuven and associate professor at University of Amsterdam. She teaches courses on data science for insurance, life and non-life insurance mathematics and loss models. Research-wise Katrien puts focus on pricing, reserving and fraud analytics, as well as mortality dynamics. </p>
 
 <p align="justify">*Jonas Crevecoeur* is a post-doctoral researcher in biostatistics at KU Leuven. He recently obtained his PhD within the insurance research group at KU Leuven and holds the degrees of MSc in Mathematics, MSc in Insurance Studies and MSc in Financial and Actuarial Engineering (KU Leuven). Before starting the PhD program he worked as an intern with QBE Re (Belgium office) where he studied multiline products and copulas. Jonas was a PhD fellow of the Research Foundation - Flanders (FWO, PhD fellowship fundamental research).</p> 
 
