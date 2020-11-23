@@ -49,12 +49,12 @@ The detailed schedule is subject to small changes.
 |         | 09.45 - 10.20 | Data sets | | 
 |         | 10.30 - 11.20 | Frequency models | |
 |         | 11.30 - 12.30 | Severity models | |
-| Day 2   | 09.30 - 09.50 | Motivation and strategies | |
-|         | 09.50 - 10.20 | Reserving data structures (part 1): daily and yearly data | |
-|         | 10.30 - 10.45 | Reserving data structures (part 2): individual and aggregated data | |
-|         | 10.45 - 11.20 | Claims reserving with triangles | | 
-|         | 11.30 - 12.10 | When the chain ladder method fails | |
-|         | 12.10 - 12.30 | Research outlook  |  |
+| Day 2   | 09.30 - 09.50 | Motivation and strategies | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#motivation) |
+|         | 09.50 - 10.20 | Reserving data structures (part 1): daily and yearly data | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#horizontal_aggregation) |
+|         | 10.30 - 10.45 | Reserving data structures (part 2): individual and aggregated data | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#vertical_aggregation) |
+|         | 10.45 - 11.20 | Claims reserving with triangles | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder) | 
+|         | 11.30 - 12.10 | When the chain ladder method fails | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail) |
+|         | 12.10 - 12.30 | Research outlook  | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook) |
 | Day 3   | 09.30 - 10.00  | Motivation and fraud detection cycle | |
 |         | 10.00 - 10.20 | Network and tabular data | |
 |         | 10.30 - 11.00 | Ranking algorithm |  |
@@ -133,7 +133,7 @@ Please bring a laptop with a recent version of R and RStudio installed. Make sur
 
 Please run the following script in your R session to install the required packages
 
-```{r}
+```{r, eval = FALSE}
 packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "DMwR", "pROC", "ChainLadder", "lubridate")
 new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
