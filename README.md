@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud* course in November 2020.
 
-📆 November 25, 26 and 27, 2020 <br> 🕢 From 9.30 am to 12.30 pm <br> 📌
+📆 November 25, 26 and 27, 2020 <br> 🕛 From 9.30 am to 12.30 pm <br> 📌
 online
 
 Course materials will be posted in the days before the workshop.
@@ -52,26 +52,26 @@ methods on your own.
 
 The detailed schedule is subject to small changes.
 
-| Session | Duration      | Description                                                        | Lecture material                                                                                                                                                                                                                             | R script |
-| :-----: | ------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-|  Day 0  | your own pace | Prework                                                            | sheets prework in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.html) and in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.pdf) |          |
-|  Day 1  | 09.30 - 09.45 | Prologue                                                           |                                                                                                                                                                                                                                              |          |
-|         | 09.45 - 10.20 | Data sets                                                          |                                                                                                                                                                                                                                              |          |
-|         | 10.30 - 11.20 | Frequency models                                                   |                                                                                                                                                                                                                                              |          |
-|         | 11.30 - 12.30 | Severity models                                                    |                                                                                                                                                                                                                                              |          |
-|  Day 2  | 09.30 - 09.50 | Motivation and strategies                                          | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#motivation)                                                                                                |          |
-|         | 09.50 - 10.20 | Reserving data structures (part 1): daily and yearly data          | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#horizontal_aggregation)                                                                                    |          |
-|         | 10.30 - 10.45 | Reserving data structures (part 2): individual and aggregated data | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#vertical_aggregation)                                                                                      |          |
-|         | 10.45 - 11.20 | Claims reserving with triangles                                    | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder)                                                                                               |          |
-|         | 11.30 - 12.10 | When the chain ladder method fails                                 | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail)                                                                                           |          |
-|         | 12.10 - 12.30 | Research outlook                                                   | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook)                                                                                          |          |
-|  Day 3  | 09.30 - 10.00 | Motivation and fraud detection cycle                               |                                                                                                                                                                                                                                              |          |
-|         | 10.00 - 10.20 | Network and tabular data                                           |                                                                                                                                                                                                                                              |          |
-|         | 10.30 - 11.00 | Ranking algorithm                                                  |                                                                                                                                                                                                                                              |          |
-|         | 11.00 - 11.20 | Featurization                                                      |                                                                                                                                                                                                                                              |          |
-|         | 11.30 - 12.00 | Supervised learning with imbalanced data                           |                                                                                                                                                                                                                                              |          |
-|         | 12.00 - 12.20 | Evaluation metrics                                                 |                                                                                                                                                                                                                                              |          |
-|         | 12.20 - 12.30 | Wrap-up                                                            |                                                                                                                                                                                                                                              |          |
+| Session | Duration      | Description                                                        | Lecture material                                                                                                                                                                                                                                           |
+| :-----: | ------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  Day 0  | your own pace | Prework                                                            | sheets prework in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.html) and in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/prework/prework_day_0.pdf)               |
+|  Day 1  | 09.30 - 09.45 | Prologue                                                           | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/loss_modelling_reserving_analytics_day_1.html#prologue) and in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/day_1.pdf) |
+|         | 09.45 - 10.20 | Data sets                                                          | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/loss_modelling_reserving_analytics_day_1.html#data-sets)                                                                                                     |
+|         | 10.30 - 11.20 | Frequency models                                                   | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/loss_modelling_reserving_analytics_day_1.html#frequency)                                                                                                     |
+|         | 11.30 - 12.30 | Severity models                                                    | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/loss_modelling_reserving_analytics_day_1.html#severity)                                                                                                      |
+|  Day 2  | 09.30 - 09.50 | Motivation and strategies                                          | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#motivation)                                                                                                              |
+|         | 09.50 - 10.20 | Reserving data structures (part 1): daily and yearly data          | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#horizontal_aggregation)                                                                                                  |
+|         | 10.30 - 10.45 | Reserving data structures (part 2): individual and aggregated data | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#vertical_aggregation)                                                                                                    |
+|         | 10.45 - 11.20 | Claims reserving with triangles                                    | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder)                                                                                                             |
+|         | 11.30 - 12.10 | When the chain ladder method fails                                 | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail)                                                                                                         |
+|         | 12.10 - 12.30 | Research outlook                                                   | [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook)                                                                                                        |
+|  Day 3  | 09.30 - 10.00 | Motivation and fraud detection cycle                               |                                                                                                                                                                                                                                                            |
+|         | 10.00 - 10.20 | Network and tabular data                                           |                                                                                                                                                                                                                                                            |
+|         | 10.30 - 11.00 | Ranking algorithm                                                  |                                                                                                                                                                                                                                                            |
+|         | 11.00 - 11.20 | Featurization                                                      |                                                                                                                                                                                                                                                            |
+|         | 11.30 - 12.00 | Supervised learning with imbalanced data                           |                                                                                                                                                                                                                                                            |
+|         | 12.00 - 12.20 | Evaluation metrics                                                 |                                                                                                                                                                                                                                                            |
+|         | 12.20 - 12.30 | Wrap-up                                                            |                                                                                                                                                                                                                                                            |
 
 ##### Half-day 1: Loss modelling analytics
 
@@ -85,7 +85,10 @@ Topics include:
     distributions, splicing to construct a global fit, mixing, estimate
     a risk measure.
 
-Download lecture sheets TBC.
+Download lecture sheets in
+[html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/loss_modelling_reserving_analytics_day_1.html)
+and
+[pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day1/day_1.pdf).
 
 ##### Half-day 2: Claims reserving analytics
 
@@ -97,7 +100,9 @@ Topics include:
   - fitting well known claims reserving methods
   - when the simple methods fail: what else is there?
 
-Download lecture sheets TBC.
+Download lecture sheets in
+[html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html)
+and \[pdf\].
 
 ##### Half-day 3: Insurance fraud analytics
 
