@@ -1,0 +1,20 @@
+@import url(https://fonts.googleapis.com/css?family=Fira+Sans:300,300,400,400,500,500,700,700);
+@import url(https://cdn.rawgit.com/tonsky/FiraCode/1.204/distr/fira_code.css);
+@import url(https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700);
+
+body {
+  font-family: 'Fira Sans','Droid Serif', 'Palatino Linotype', 'Book Antiqua', Palatino, 'Microsoft YaHei', 'Songti SC', serif;
+}
+
+.remark-code, .remark-inline-code {
+  font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace;
+  font-size: 80%;
+}
+
+.small .remark-code { /*Change made here*/
+  font-size: 70% !important;
+}
+
+.tiny .remark-code { /*Change made here*/
+  font-size: 50% !important;
+}

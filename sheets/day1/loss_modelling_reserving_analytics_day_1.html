@@ -1,0 +1,2826 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Loss modelling, reserving and fraud analytics in R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Katrien Antonio &amp; Jonas Crevecoeur" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/metropolis.css" type="text/css" />
+    <link rel="stylesheet" href="css/metropolis-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="css/my-css.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Loss modelling, reserving and fraud analytics in R
+## A hands-on workshop
+<html>
+<div style="float:left">
+
+</div>
+<hr align='center' color='#116E8A' size=1px width=97%>
+</html>
+### Katrien Antonio &amp; Jonas Crevecoeur
+### <a href="https://www.github.com/katrienantonio/workshop-loss-reserv-fraud-2020">Arcturus 2020 workshop</a> | November 25-27, 2020
+
+---
+
+
+
+
+
+
+class: inverse, center, middle
+name: prologue
+
+# Prologue
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#FAFAFA' size=1px width=796px&gt;&lt;/html&gt;
+
+---
+
+name: introduction
+
+# Introduction
+
+### Course
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud-2020
+
+The course repo on GitHub, where you can find the data sets, lecture sheets, R scripts and R markdown files.
+
+--
+
+### Us
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 512 512"&gt;&lt;path d="M326.612 185.391c59.747 59.809 58.927 155.698.36 214.59-.11.12-.24.25-.36.37l-67.2 67.2c-59.27 59.27-155.699 59.262-214.96 0-59.27-59.26-59.27-155.7 0-214.96l37.106-37.106c9.84-9.84 26.786-3.3 27.294 10.606.648 17.722 3.826 35.527 9.69 52.721 1.986 5.822.567 12.262-3.783 16.612l-13.087 13.087c-28.026 28.026-28.905 73.66-1.155 101.96 28.024 28.579 74.086 28.749 102.325.51l67.2-67.19c28.191-28.191 28.073-73.757 0-101.83-3.701-3.694-7.429-6.564-10.341-8.569a16.037 16.037 0 0 1-6.947-12.606c-.396-10.567 3.348-21.456 11.698-29.806l21.054-21.055c5.521-5.521 14.182-6.199 20.584-1.731a152.482 152.482 0 0 1 20.522 17.197zM467.547 44.449c-59.261-59.262-155.69-59.27-214.96 0l-67.2 67.2c-.12.12-.25.25-.36.37-58.566 58.892-59.387 154.781.36 214.59a152.454 152.454 0 0 0 20.521 17.196c6.402 4.468 15.064 3.789 20.584-1.731l21.054-21.055c8.35-8.35 12.094-19.239 11.698-29.806a16.037 16.037 0 0 0-6.947-12.606c-2.912-2.005-6.64-4.875-10.341-8.569-28.073-28.073-28.191-73.639 0-101.83l67.2-67.19c28.239-28.239 74.3-28.069 102.325.51 27.75 28.3 26.872 73.934-1.155 101.96l-13.087 13.087c-4.35 4.35-5.769 10.79-3.783 16.612 5.864 17.194 9.042 34.999 9.69 52.721.509 13.906 17.454 20.446 27.294 10.606l37.106-37.106c59.271-59.259 59.271-155.699.001-214.959z"/&gt;&lt;/svg&gt; [https://katrienantonio.github.io/](https://katrienantonio.github.io/)
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 512 512"&gt;&lt;path d="M476 3.2L12.5 270.6c-18.1 10.4-15.8 35.6 2.2 43.2L121 358.4l287.3-253.2c5.5-4.9 13.3 2.6 8.6 8.3L176 407v80.5c0 23.6 28.5 32.9 42.5 15.8L282 426l124.6 52.2c14.2 6 30.4-2.9 33-18.2l72-432C515 7.8 493.3-6.8 476 3.2z"/&gt;&lt;/svg&gt; [katrien.antonio@kuleuven.be](mailto:katrien.antonio@kuleuven.be) &amp; [jonas.crevecoeur@kuleuven.be](mailto:jonas.crevecoeur@kuleuven.be) 
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 640 512"&gt;&lt;path d="M622.34 153.2L343.4 67.5c-15.2-4.67-31.6-4.67-46.79 0L17.66 153.2c-23.54 7.23-23.54 38.36 0 45.59l48.63 14.94c-10.67 13.19-17.23 29.28-17.88 46.9C38.78 266.15 32 276.11 32 288c0 10.78 5.68 19.85 13.86 25.65L20.33 428.53C18.11 438.52 25.71 448 35.94 448h56.11c10.24 0 17.84-9.48 15.62-19.47L82.14 313.65C90.32 307.85 96 298.78 96 288c0-11.57-6.47-21.25-15.66-26.87.76-15.02 8.44-28.3 20.69-36.72L296.6 284.5c9.06 2.78 26.44 6.25 46.79 0l278.95-85.7c23.55-7.24 23.55-38.36 0-45.6zM352.79 315.09c-28.53 8.76-52.84 3.92-65.59 0l-145.02-44.55L128 384c0 35.35 85.96 64 192 64s192-28.65 192-64l-14.18-113.47-145.03 44.56z"/&gt;&lt;/svg&gt; (Katrien, PhD) Professor in insurance data science at KU Leuven and University of Amsterdam
+
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 640 512"&gt;&lt;path d="M622.34 153.2L343.4 67.5c-15.2-4.67-31.6-4.67-46.79 0L17.66 153.2c-23.54 7.23-23.54 38.36 0 45.59l48.63 14.94c-10.67 13.19-17.23 29.28-17.88 46.9C38.78 266.15 32 276.11 32 288c0 10.78 5.68 19.85 13.86 25.65L20.33 428.53C18.11 438.52 25.71 448 35.94 448h56.11c10.24 0 17.84-9.48 15.62-19.47L82.14 313.65C90.32 307.85 96 298.78 96 288c0-11.57-6.47-21.25-15.66-26.87.76-15.02 8.44-28.3 20.69-36.72L296.6 284.5c9.06 2.78 26.44 6.25 46.79 0l278.95-85.7c23.55-7.24 23.55-38.36 0-45.6zM352.79 315.09c-28.53 8.76-52.84 3.92-65.59 0l-145.02-44.55L128 384c0 35.35 85.96 64 192 64s192-28.65 192-64l-14.18-113.47-145.03 44.56z"/&gt;&lt;/svg&gt; (Jonas, PhD) Post-doctoral researcher in biostatistics at KU Leuven
+
+---
+
+name: checklist
+
+# Checklist
+
+☑ Do you have a fairly recent version of R?
+  
+  ```r
+  version$version.string
+  ## [1] "R version 4.0.3 (2020-10-10)"
+  ```
+
+☑ Do you have a fairly recent version of RStudio? 
+  
+  ```r
+  RStudio.Version()$version
+  ## Requires an interactive session but should return something like "[1] ‘1.3.1093’"
+  ```
+
+☑ Have you installed the R packages listed in the software requirements? 
+
+or
+
+☑ Have you created an account on RStudio Cloud (to avoid any local installation issues)?
+  
+---
+
+name: why-this-course # inspired by Grant McDermott intro lecture
+
+# Why this training?
+
+### The goals of this training .font140[&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 512 512"&gt;&lt;path d="M505.05 19.1a15.89 15.89 0 0 0-12.2-12.2C460.65 0 435.46 0 410.36 0c-103.2 0-165.1 55.2-211.29 128H94.87A48 48 0 0 0 52 154.49l-49.42 98.8A24 24 0 0 0 24.07 288h103.77l-22.47 22.47a32 32 0 0 0 0 45.25l50.9 50.91a32 32 0 0 0 45.26 0L224 384.16V488a24 24 0 0 0 34.7 21.49l98.7-49.39a47.91 47.91 0 0 0 26.5-42.9V312.79c72.59-46.3 128-108.4 128-211.09.1-25.2.1-50.4-6.85-82.6zM384 168a40 40 0 1 1 40-40 40 40 0 0 1-40 40z"/&gt;&lt;/svg&gt;]
+
+--
+
+* develop practical .KULbginline[data handling foundations], e.g. going from granular claims development data to aggregated figures
+
+--
+
+* visualize and explore data 
+
+--
+
+* cover essential actuarial modelling tasks, including loss modelling for pricing, claims reserving and building a fraud detection model
+
+--
+
+* learn by doing, get you started (in particular when you have limited experience in R). 
+
+--
+
+&lt;br&gt;
+
+&gt; *"In short, we will cover things that we wish someone had taught us in our undergraduate programs."* 
+&gt; &lt;br&gt;
+&gt; .font80[This quote is from the [Data science for economists course](http://github.com/uo-ec607/lectures) by Grant McDermott.]
+
+---
+
+name: universe
+
+# Why R and RStudio? 
+
+### Data science positivism
+
+- Next to Python, R has become the *de facto* language for data science, with a cutting edge *machine learning toolbox*.
+- See: [The Popularity of Data Science Software](http://r4stats.com/articles/popularity/)
+- R is open-source with a very active community of users spanning academia and industry.
+
+--
+
+### Bridge to actuarial science, econometrics and other tools
+
+- R has all of the statistics and econometrics support, and is amazingly adaptable as a “glue” language to other programming languages and APIs.
+- R does not try to be everything to everyone. The RStudio IDE and ecosystem allow for further, seemless integration (with e.g. python, keras, tensorflow or C).
+- Widely used in actuarial undergraduate programs 
+
+--
+
+### Disclaimer + Read more
+
+- It's also the language that we know best.
+- If you want to read more: [R-vs-Python](https://blog.rstudio.com/2019/12/17/r-vs-python-what-s-the-best-for-language-for-data-science/), [when to use Python or R](https://www.datacamp.com/community/blog/when-to-use-python-or-r) or [Hadley Wickham on the future of R](https://qz.com/1661487/hadley-wickham-on-the-future-of-r-python-and-the-tidyverse/)
+
+---
+
+class: clear, center, middle
+
+background-image: url("image/tidyverse2.1.png")
+background-size: cover
+background-size: 65% 
+background-position: center
+
+---
+
+name: tidyverse
+
+# Welcome to the tidyverse!
+
+&gt;&lt;p align="justify"&gt;The .KULbginline[tidyverse] is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures. &lt;/p&gt;
+
+&lt;center&gt;
+&lt;img src="image/tidyverse_wide.png" width="750"/&gt;
+&lt;/center&gt;
+
+More on: [tidyverse](https://www.tidyverse.org).
+
+Install the packages with `install.packages("tidyverse")`. Then run `library(tidyverse)` to load the core tidyverse.
+
+
+
+
+---
+
+
+# Today's Outline
+
+.pull-left[
+
+* [Prologue](#prologue)
+
+* [What's out there: the R universe](#universe) (see the prework)
+
+  - why R and RStudio?
+  - welcome to the tidyverse!
+  - principles of tidy data
+  - workflow of a data scientist
+
+* [Data wrangling and visualisation](#tidyverse) (see the prework)
+
+  - tibbles
+  - pipe operator `%&gt;%`
+  - {dplyr} instructions
+  - {ggplot2} for data visualisation
+  - what else is there?
+
+]
+
+.pull-right[
+
+* [Data sets used in the session](#data-sets)
+
+  - MTPL data on frequency and severity of claims
+  - Secura Re losses
+  
+* [Fitting frequency models in R](#frequency)
+
+  - frequency - severity approach
+  - the `\((a,b,0)\)` class
+  - MLE, model selection and evaluation tools
+  - excess zeroes
+ 
+* [Fitting severity models in R](#severity)
+
+  - from simple to complex parametric distributions
+  - be aware of truncation and censoring
+  - a global fit via splicing
+  - case-study on the Secura Re losses
+  - what else is there?
+  
+]
+
+
+---
+
+
+class: inverse, center, middle
+name: data-sets
+
+# Data sets used in the session 
+
+&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#FAFAFA' size=1px width=796px&gt;&lt;/html&gt;
+
+
+---
+
+# Data sets used in this session - MTPL &lt;img src="image/pipe.png" class="title-hex"&gt; &lt;img src="image/dplyr.png" class="title-hex"&gt; &lt;img src="image/ggplot2.png" class="title-hex"&gt;
+
+We illustrate some first data handling steps on the Motor Third Party Liability data set. There are 163 231 policyholders in this data set. 
+
+The frequency of claiming (`nclaims`) and corresponding severity (`avg`, the amount paid on average per claim reported by a policyholder) are the .KULbginline[target variables] in this data set. 
+
+Predictor variables are: 
+
+* the exposure-to-risk, the duration of the insurance coverage (max. 1 year)
+* factor variables, e.g. gender, coverage, fuel
+* continuous, numeric variables, e.g. age of the policyholder, age of the car
+* spatial information: postal code (in Belgium) of the municipality where the policyholder resides.
+
+More details in [Henckaerts et al. (2018, Scandinavian Actuarial Journal)](https://katrienantonio.github.io/portfolio/machine-learning) and [Henckaerts et al. (2020, North American Actuarial Journal)](https://katrienantonio.github.io/portfolio/machine-learning).
+
+---
+
+# Data sets used in this session - MTPL &lt;img src="image/pipe.png" class="title-hex"&gt; &lt;img src="image/dplyr.png" class="title-hex"&gt; &lt;img src="image/ggplot2.png" class="title-hex"&gt;
+
+You can load the data from a .R script in the course material:
+
+
+```r
+# install.packages("rstudioapi")
+dir &lt;- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(dir)
+mtpl_orig &lt;- read.table('./data/PC_data.txt', 
+                                  header = TRUE)
+mtpl_orig &lt;- as_tibble(mtpl_orig)
+```
+
+If you work in an R notebook or R markdown file, you can also go for:
+
+```r
+# install.packages("here")
+library(here)
+dir &lt;- here::here()   
+setwd(dir) 
+mtpl_orig &lt;- read.table('./data/PC_data.txt', 
+                                  header = TRUE)
+mtpl_orig &lt;- as_tibble(mtpl_orig)
+```
+
+The last instruction transforms `mtpl_orig` into a `tibble`.
+
+---
+
+class: clear
+
+These instructions are recommended because they .KULbginline[avoid referring to a specific working directory on your computer], e.g.
+
+
+```r
+setwd("C:\\Users\\u0043788\\Dropbox\\Arcturus course\\data") 
+mtpl_orig &lt;- read.table('PC_data.txt', header = TRUE)
+```
+
+--
+
+If you organize your data analysis or project in a folder on your computer that holds all relevant files, then the above instructions allow you (and your colleagues) to get started right away. 
+
+The only thing you need is an organized file structure.
+
+--
+
+The {rstudioapi} package is developed for RStudio. The {here} library is more general.
+
+Do note that when working in a .Rmd, {here} will use the folder that markdown lives in as the working directory, but if you are working in a script (.R) the working directory is the top level of the project file.
+
+---
+
+class: clear
+name: explore-data
+
+First of all, we explore the structure of `mtpl_orig` with `str()`.
+
+
+
+
+```r
+str(mtpl_orig)
+## tibble [163,231 x 18] (S3: tbl_df/tbl/data.frame)
+##  $ ID      : int [1:163231] 1 2 3 4 5 6 7 8 9 10 ...
+##  $ NCLAIMS : int [1:163231] 1 0 0 0 1 0 1 0 0 0 ...
+##  $ AMOUNT  : num [1:163231] 1618 0 0 0 156 ...
+##  $ AVG     : num [1:163231] 1618 NA NA NA 156 ...
+##  $ EXP     : num [1:163231] 1 1 1 1 0.0466 ...
+##  $ COVERAGE: chr [1:163231] "TPL" "PO" "TPL" "TPL" ...
+##  $ FUEL    : chr [1:163231] "gasoline" "gasoline" "diesel" "gasoline" ...
+##  $ USE     : chr [1:163231] "private" "private" "private" "private" ...
+##  $ FLEET   : chr [1:163231] "N" "N" "N" "N" ...
+##  $ SEX     : chr [1:163231] "male" "female" "male" "male" ...
+##  $ AGEPH   : int [1:163231] 50 64 60 77 28 26 26 58 59 34 ...
+##  $ BM      : int [1:163231] 5 5 0 0 9 11 11 11 0 7 ...
+##  $ AGEC    : int [1:163231] 12 3 10 15 7 12 8 14 3 6 ...
+##  $ POWER   : int [1:163231] 77 66 70 57 70 70 55 47 98 74 ...
+##  $ PC      : int [1:163231] 1000 1000 1000 1000 1000 1000 1000 1000 1000 1000 ...
+##  $ TOWN    : chr [1:163231] "BRUSSEL" "BRUSSEL" "BRUSSEL" "BRUSSEL" ...
+##  $ LONG    : num [1:163231] 4.36 4.36 4.36 4.36 4.36 ...
+##  $ LAT     : num [1:163231] 50.8 50.8 50.8 50.8 50.8 ...
+```
+
+---
+
+class: clear
+name: explore-data
+
+Or with `head()`...
+
+
+```r
+head(mtpl_orig) %&gt;% kable(format = 'html')
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; ID &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; NCLAIMS &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AMOUNT &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AVG &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; EXP &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; COVERAGE &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; FUEL &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; USE &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; FLEET &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; SEX &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AGEPH &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BM &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AGEC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; POWER &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; PC &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; TOWN &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; LONG &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; LAT &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1618.0010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1618.0010 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PO &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; female &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 66 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; diesel &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 15 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 57 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 155.9746 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 155.9746 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0465753 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; female &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 28 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 9 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 7 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 6 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.0000000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 26 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 11 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.355223 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.84539 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+
+---
+
+class: clear
+name: data-sets-used
+
+Note that the data `mtpl_orig` uses capitals for the variable names
+
+
+```r
+mtpl_orig %&gt;% slice(1:3) %&gt;% select(-LONG, -LAT) %&gt;% kable(format = 'html')
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; ID &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; NCLAIMS &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AMOUNT &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AVG &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; EXP &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; COVERAGE &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; FUEL &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; USE &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; FLEET &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; SEX &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AGEPH &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; BM &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; AGEC &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; POWER &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; PC &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; TOWN &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1618.001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1618.001 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 12 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PO &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; gasoline &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; female &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 64 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 66 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.000 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; TPL &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; diesel &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; private &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; N &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 60 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 70 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1000 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; BRUSSEL &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+We change this to lower case variables, and rename `exp` to `expo`.
+
+
+```r
+mtpl &lt;- mtpl_orig %&gt;%
+  # rename all columns 
+  rename_all(function(.name) {
+    .name %&gt;% 
+      # replace all names with the lowercase versions
+      tolower 
+    })
+mtpl &lt;- rename(mtpl, expo = exp)
+```
+
+Check `rename_all()` in {dplyr}.
+
+---
+
+name: yourturn
+class: clear
+
+.left-column[
+
+&lt;!-- Add icon library --&gt;
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"&gt;
+
+## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
+
+
+]
+
+.right-column[
+
+To get warmed up, let's load the `mtpl` data and do some .KULbginline[basic investigations] into the variables. The idea is to get a feel for the data. 
+
+Your starting point are the instructions in the R script on the course website.
+
+.hi-pink[Q]: you will work through the following exploratory steps.
+
+1. Calculate the empirical claim frequency, per unit of exposure. Then do the same per gender. What do you conclude?
+
+2. Visualize the distribution of `nclaims` with a bar plot, use `geom_bar` as a layer in `ggplot`. Try different versions of this bar plot.
+
+3. Visualize the distribution of `avg` with a density plot, use `geom_density` as a layer. Restrict the range of values displayed in the plot.
+
+4. Visualize the distribution of `avg` with a histogram, use `geom_histogram`. Play with the `binwidth`.
+
+
+
+]
+
+
+---
+
+class: clear
+name: first-steps-MTPL
+
+
+
+.pull-left[
+
+```r
+dim(mtpl)
+```
+
+
+```
+## [1] 163231     18
+```
+
+
+```r
+mtpl %&gt;% summarize(emp_freq = 
+                      sum(nclaims) / sum(expo))
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; emp_freq &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.1393352 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+
+```r
+mtpl %&gt;% 
+  group_by(sex) %&gt;% 
+  summarize(emp_freq = sum(nclaims) / sum(expo))
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; sex &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; emp_freq &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; female &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1484325 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; male &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.1361164 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+
+```r
+g &lt;- ggplot(mtpl, aes(nclaims)) + theme_bw() + 
+     geom_bar(aes(weight = expo), col = KULbg, 
+              fill = KULbg, alpha = 0.5) + 
+     labs(y = "Abs freq (in exposure)") +
+     ggtitle("MTPL - number of claims")
+g
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-15-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+```r
+g &lt;- ggplot(mtpl, aes(nclaims)) + theme_bw() + 
+     geom_bar(aes(weight = expo), col = KULbg, 
+              fill = KULbg, alpha = 0.5) + 
+     labs(y = "Abs freq (in exposure)") +
+     ggtitle("MTPL - number of claims")
+g
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-16-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+.pull-right[
+
+```r
+g &lt;- ggplot(mtpl, aes(nclaims)) + theme_bw()
+g + geom_bar(aes(y = (..count..)/sum(..count..)), 
+    col = KULbg, fill = KULbg, alpha = 0.5) + 
+  labs(y = "Relative frequency") +
+  ggtitle("MTPL - relative number of claims")
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-18-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+With a density plot: mind the `filter(.)` instruction and the use of `xlim(.,.)`
+
+
+```r
+g_dens &lt;- mtpl %&gt;% filter(avg &gt; 0 &amp; avg &lt;= 81000) %&gt;% 
+          ggplot(aes(x = avg)) + 
+          theme_bw() +
+          geom_density(adjust = 3, col = KULbg, 
+                       fill = KULbg, alpha = 0.5) + 
+          xlim(0, 1e4) + 
+          ylab("") + xlab("severity") +
+    ggtitle("MTPL data - average amount per claim")
+g_dens
+```
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-20-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+---
+
+class: clear
+
+.pull-left[
+
+With a histogram:
+
+
+```r
+g &lt;- mtpl %&gt;% filter(avg &gt; 0 &amp; avg &lt;= 81000) %&gt;% 
+     ggplot(aes(x = avg)) + 
+      theme_bw() + xlab("severity") +
+      geom_histogram(binwidth = 100, col = KULbg, 
+            fill = KULbg, alpha = 0.5) + 
+      xlim(0, 1e4) +
+      labs(y = "Frequency histogram")
+g
+```
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-22-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+---
+
+# Data sets used in this session - Secura Re losses
+
+.pull-left[
+Secura Belgian Re automobile claims from 1988 to 2001 data, gathered from several European insurance companies, .KULbginlin[exceeding 1 200 000 Euro]. 
+
+The data were, among others, corrected for inflation, see the {ReIns} library.
+
+
+```r
+secura &lt;- read.table(file="./data/SecuraRe.txt", 
+                   header = TRUE, sep = "\t")
+```
+
+The density plots on the right show typical features of insurance loss data: 
+
+- positive
+- skewed to the right
+- heavy right tail
+- (possibly) subject to truncation and censoring.
+
+]
+
+.pull-right[
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-24-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+name: yourturn
+class: clear
+
+.left-column[
+
+&lt;!-- Add icon library --&gt;
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"&gt;
+
+## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
+
+
+]
+
+.right-column[
+
+You will now use the instructions covered in the exploration of the `mtpl` data to picture the `secura` losses.
+
+.hi-pink[Q]: you will work through the following exploratory steps.
+
+1. Visualize the distribution of `Loss` in `secura` with a density plot, use `geom_density` as a layer. 
+
+2. Do the same for `log(Loss)`.
+
+3. Plot the `Loss` versus `Year`. Use the `geom_point` layer.
+
+
+]
+
+---
+
+class: clear
+
+The `secura` losses over time...
+
+.pull-left[
+
+```r
+ggplot(secura, aes(Year, Loss)) + theme_bw() + 
+  geom_point(colour = KULbg, size = 2, alpha = 0.5) + 
+  ggtitle('Secura Re - losses arriving over time')
+```
+]
+
+.pull-right[
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-26-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+class: inverse, center, middle
+name: frequency
+
+# Fitting frequency models in R
+
+---
+
+name: freq-sev approach 
+
+# The frequency - severity approach 
+
+.pull-left[
+
+&lt;center&gt;
+&lt;img src="image/freq-sev.png" width="600"/&gt;
+&lt;/center&gt;
+
+.KULbginline[Assumptions:] 
+
+* claim severity and claim frequency are independent
+
+* we ignore any additional covariates (cfr. workshop last year).
+
+
+]
+
+.pull-right[
+
+Each record `\(i\)` in the data set registers
+  
+* .KULbginline[exposure], `\(e_i\)`, fraction of the year in which the contract was active 
+  
+* .KULbginline[number of claims], `\(N_i\)`, observed claim count in the period of exposure
+  
+* .KULbginline[average claim size] per reported claim (or: severity), `\(S_i\)`, total losses in the period of exposure divided by the number of claims, if `\(N_i&gt;0\)`.
+
+
+]
+
+---
+
+name: freq-sev approach 
+
+# The (a, b, 0) class
+
+.pull-left[
+
+Let `\(N\)` be a count or frequency random variable, with probability function (pf) `\(Pr(N = k) = p_k\)`.
+
+The `\((a,b,0)\)`-class of frequency distributions is a two-parameter class of distributions that satisfy
+
+`$$k \cdot \frac{p_k}{p_{k-1}} = a \cdot k + b \quad k \geq 1.$$`
+
+The probability `\(p_0\)` then follows from `\(\sum_{k=0}^{+\infty} p_k = 1\)`.
+
+Members of this class are the:
+
+* Poisson
+* Binomial
+* Negative Binomial
+* Geometric distribution.
+
+]
+
+.pull-right[
+
+&lt;center&gt;
+&lt;img src="image/LossModels.jpg" width="300"/&gt;
+&lt;/center&gt;
+
+
+]
+
+---
+
+class: clear
+
+
+Relevant claim frequency distributions in the `\((a,b,0)\)` class: 
+
+&lt;br/&gt;
+
+Member           |   slope `\(a\)` | Probability function `\(p_k\)` |  Parameter(s)  | Moments
+:-------------------------|:-------------------------|:-------------------------|:-------------------------
+Binomial | `\(a &lt; 0\)` | `\(\frac{n!}{k!(n-k)!} \cdot p^k \cdot (1-p)^k\)`  |  `\(p \in (0, 1)\)` |  `\(E(N) = n \cdot p\)`
+         |    |                         | `\(n \in \mathbb{N}\)`  | `\(\text{Var}(N) = n \cdot p \cdot (1-p)\)` 
+Poisson | `\(a = 0\)` | `\(e^{-\lambda} \cdot \frac{\lambda^k}{k!}\)`  |  `\(\lambda \in (0, \infty)\)`  |    `\(E(N) = \lambda\)`
+   |    |   |   | `\(\text{Var}(N) = \lambda\)` 
+Negative Binomial | `\(a &gt; 0\)` | `\(\frac{\Gamma(r+k)}{k! \Gamma(r)} \cdot \left( \frac{r}{r+\mu}\right)^r \cdot \left( \frac{\mu}{r+\mu} \right)^k\)` | `\(\mu \in (0, \infty)\)` | `\(E(N) = \mu\)`
+       |    |   | `\(r \in (0, \infty)\)`   |   `\(\text{Var}(N) = \mu + \frac{\mu^2}{r}\)` 
+
+
+---
+
+# The (a, b, 0) class: a visual check
+
+.pull-left[
+
+To check the `\((a,b,0)\)` relation for `mtpl$nclaims` we start from the empirical count distribution
+
+
+```r
+mtpl$nclaims %&gt;% table %&gt;% prop.table
+```
+
+We store the empirical probabilities `\(\hat{p}_k\)` in a vector
+
+
+```r
+empirical &lt;- mtpl$nclaims %&gt;% 
+  table %&gt;% prop.table %&gt;% as.numeric
+```
+
+and the `\(k \cdot \frac{p_k}{p_{k-1}}\)`
+
+
+```r
+k &lt;- 1:(length(empirical) - 1)
+ab0_relation &lt;- empirical[k+1] / empirical[k] * k  
+```
+
+
+```r
+ab0_data &lt;- tibble(k = k, ab0_rel = ab0_relation)
+```
+
+]
+
+.pull-right[
+
+The positive slope when fitting `\(a \cdot k + b\)` indicates a NegBin distribution for `mtpl$nclaims`, see 
+
+
+```r
+ab0_data %&gt;% lm(ab0_rel ~ k, data = .)
+```
+
+and visually
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-32-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Empirical mean and variance of the claim frequency
+
+.pull-left[
+Let's explore different ways to calculate the .KULbginline[empirical mean claim frequency].
+
+Inspect the following instructions and list pros and cons:
+
+
+```r
+mean(mtpl$nclaims)
+sum(mtpl$nclaims)/sum(mtpl$expo)
+weighted.mean(mtpl$nclaims/mtpl$expo, mtpl$expo)
+mtpl %&gt;% 
+  summarize(emp_freq = sum(nclaims) / sum(expo)) 
+```
+
+
+```
+## [1] 0.1239715
+## [1] 0.1393352
+## [1] 0.1393352
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; emp_freq &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0.1393352 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
+.pull-right[
+
+What about the .KULbginline[empirical variance]? .KULbginline[Overdispersion]!
+
+
+```r
+m &lt;- sum(mtpl$nclaims)/sum(mtpl$expo)
+m
+## [1] 0.1393352
+var &lt;- sum((mtpl$nclaims - m * mtpl$expo)^2)/
+                sum(mtpl$expo)
+var
+## [1] 0.1517246
+```
+
+Here we use the expression for the variance: 
+
+$$\text{Var}(X) = \text{E}[(X-\text{E}X)^2] $$
+We empirically calculate the first expected value by taking exposure into account. 
+
+Moreover, we compare each realization of `nclaims` with its expected value, i.e. `m * expo` where `m` is the empirical mean claim frequency. 
+
+]
+
+---
+
+# Maximum likelihood estimation (MLE)
+
+.pull-left[
+
+Fit a distribution to the data by .KULbginline[maximizing the likelihood] over the unknown parameter vector `\(\theta\)`
+
+$$ \mathcal{L}(\theta) = \prod_{i} Pr(N_i = n_i \mid \theta).$$
+
+In practice, we minimize the negative log-likelihood
+`$$L(\theta) = - \sum_{i} \log(Pr(N_i = n_i \mid \theta)).$$`
+
+If exposure is available, we'll typically incorporate the exposure measure in the mean of the distribution
+`$$L(\theta) = - \sum_{i} \log(Pr(N_i = n_i \mid \theta,\ e_i)).$$`
+
+]
+
+.pull-right[
+
+Let's make this more concrete for the Poisson distribution:
+
+`$$N_i \sim \texttt{Poi}(e_i \cdot \lambda).$$`
+The corresponding log-likelihood becomes: 
+
+$$\sum_i n_i \cdot \log(e_i \cdot \lambda) - e_i \cdot \lambda - n_i! $$
+How about .KULbginline[fitting a parametric count distribution] to data in R?
+
+]
+
+---
+
+# Maximum likelihood estimation (MLE) in R
+
+.pull-left[
+
+A (naive) first solution uses `fitdistr(.)` from the {MASS} library
+
+
+```r
+library(MASS)
+fitdistr(mtpl$nclaims, "poisson")
+##       lambda   
+##   0.1239715495 
+##  (0.0008714846)
+```
+
+Which number do you recognize here for `\(\hat{\lambda}\)`?
+
+Alternatively, we can use the `glm(.)` function in a smart way:
+
+
+```r
+freq_glm_poi &lt;- `glm`(nclaims ~ 1, 
+                  `family = poisson(link = "log")`, 
+                  `data = mtpl`) 
+```
+
+
+]
+
+.pull-right[
+
+Fit a .KULbginline[Poisson GLM], with .KULbginline[logarithmic link] function.
+
+This implies: 
+
+`\(\color{#FFA500}{Y}\)` ~ Poisson, with only an intercept in the linear predictor
+
+`$$\begin{eqnarray*}
+    \log(E[\color{#FFA500}{Y}]) &amp;=&amp; \color{#20B2AA}{\beta_0},
+\end{eqnarray*}$$`
+
+or, 
+
+`$$E[\color{#FFA500}{Y}] = \lambda = \exp{(\color{#20B2AA}{\beta_0})}.$$`
+
+Fit this model on `data = mtpl`. 
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+
+```r
+freq_glm_poi &lt;- glm(`nclaims ~ 1`, `offset = log(expo)`, 
+                  family = poisson(link = "log"), 
+                  data = mtpl)
+freq_glm_poi %&gt;% broom::tidy()
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.970873 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0070297 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -280.3632 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+What is your estimate for the expected annual claim frequency?
+
+]
+
+.pull-right[
+  
+Use `nclaims` as `\(\color{#FFA500}{Y}\)`. 
+
+Use only an intercept in the linear predictor `~ 1`.
+
+Include `log(expo)` as an offset term in the linear predictor.
+
+Then, 
+
+`$$\begin{eqnarray*}
+\log{(\texttt{expo})}+\beta_0. \end{eqnarray*}$$`
+
+Put otherwise, 
+
+`$$\begin{eqnarray*}
+E[\color{#FFA500}{Y}] = \texttt{expo} \cdot \exp{(\beta_0)} \end{eqnarray*},$$`
+where `\(\texttt{expo}\)` refers to `expo` the exposure variable.
+]
+
+---
+
+# Maximum likelihood estimation (MLE) in R (continued)
+
+.pull-left[
+
+.KULbginline[Writing a function] for the negative log-likelihood is another option. 
+
+The general framework for a one-parameter distribution then becomes
+
+
+```r
+neg_loglik_distr &lt;- function(par, freq, expo){
+  -sum(ddistr(freq, par, log = T))
+}
+nlm(neg_loglik_distr, 1, hessian = TRUE, 
+    freq = mtpl$nclaims, expo = mtpl$expo)
+```
+
+Tweaking the general framework to the Poisson setting then becomes ...
+
+]
+
+.pull-right[
+
+
+```r
+neg_loglik_pois &lt;- function(par, freq, expo){
+  lambda &lt;- expo*exp(par)
+  -sum(dpois(freq, lambda, log = T))
+}
+sol_poi &lt;- nlm(neg_loglik_pois, 1, hessian = TRUE, 
+               freq = mtpl$nclaims, expo = mtpl$expo)
+```
+
+Inspect the results
+
+
+```r
+exp(sol_poi$estimate)
+## [1] 0.1393351
+sqrt(diag(solve(sol_poi$hessian))) 
+## [1] 0.007029369
+sol_poi$minimum
+## [1] 63837.82
+```
+
+Do you recognize these numbers?
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+We now focus on fitting the Negative Binomial distribution to the `mtpl$nclaims` frequency data, using `glm.nb()` from the {MASS} library.
+
+
+```r
+library(MASS)
+freq_glm_nb &lt;- glm.nb(`nclaims ~ 1 +` 
+                         `offset(log(expo))`, 
+                  link = log,
+                  data = mtpl)
+freq_glm_nb %&gt;% broom::tidy()
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; term &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; estimate &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; std.error &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; statistic &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; p.value &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; (Intercept) &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -1.968155 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.0073391 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; -268.174 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+The additional parameter `\(r\)` is estimated as 
+(point estimate and standard error)
+
+
+```
+## [1] 1.435807
+## [1] 0.08039722
+```
+
+
+]
+
+
+.pull-right[
+
+Inspect the model output via
+
+
+```r
+summary(freq_glm_nb)
+## 
+## Call:
+## glm.nb(formula = nclaims ~ 1 + offset(log(expo)), data = mtpl, 
+##     link = log, init.theta = 1.435806632)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -0.5164  -0.5164  -0.5164  -0.4263   4.8511  
+## 
+## Coefficients:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.968155   0.007339  -268.2   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for Negative Binomial(1.4358) family taken to be 1)
+## 
+##     Null deviance: 78254  on 163230  degrees of freedom
+## Residual deviance: 78254  on 163230  degrees of freedom
+## AIC: 127192
+## 
+## Number of Fisher Scoring iterations: 1
+## 
+## 
+##               Theta:  1.4358 
+##           Std. Err.:  0.0804 
+## 
+##  2 x log-likelihood:  -127187.8520
+```
+
+
+]
+
+
+---
+
+name: yourturn
+class: clear
+
+.left-column[
+
+&lt;!-- Add icon library --&gt;
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"&gt;
+
+## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
+
+
+]
+
+.right-column[
+
+.hi-pink[Q]: you will work through the following steps
+
+1. Starting from the handcrafted Poisson likelihood and its numerical optimization, can you write similar instructions for the Negative Binomial?
+
+2. Can you match the estimates obtained with your routine with those of the `glm.nb()` call?
+
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+Let's now focus on the handcrafted Negative Binomial likelihood optimization:
+
+
+```r
+neg_loglik_nb &lt;- function(par, freq, expo){
+  mu &lt;- expo*exp(par[1])
+  r &lt;- exp(par[2])
+  -sum(dnbinom(freq, size = r, mu = mu, log = TRUE))
+}
+sol_nb &lt;- nlm(neg_loglik_nb, c(1, 1), hessian = TRUE, 
+              freq = mtpl$nclaims, expo = mtpl$expo)
+```
+
+Inspect the resulting estimates
+
+
+```r
+sol_nb$estimate
+## [1] -1.9681557  0.3617181
+```
+
+
+]
+
+.pull-right[
+
+We inspect the results
+
+
+```r
+exp(sol_nb$estimate)
+## [1] 0.1397143 1.4357941
+sqrt(diag(solve(sol_nb$hessian))) 
+## [1] 0.007349782 0.056009902
+sol_nb$minimum
+## [1] 63593.93
+```
+
+The variance estimated by this Negative Binomial model is then
+
+
+```r
+exp(sol_nb$estimate[1]) + 
+(exp(sol_nb$estimate[1])^2)/(exp(sol_nb$estimate[2]))
+## [1] 0.1533096
+```
+
+which is very close to the empirical variance!
+
+
+
+
+]
+
+---
+
+# Model selection and evaluation tools
+
+The .KULbginline[AIC] can be used to compare models
+
+`$$AIC = 2 \cdot \#\text{param} - 2 \cdot \text{log-likelihood}.$$`
+
+
+```r
+AIC_poi &lt;- 2*length(sol_poi$estimate) + 2*sol_poi$minimum
+AIC_nb &lt;- 2*length(sol_nb$estimate) + 2*sol_nb$minimum
+c(AIC_nb = AIC_nb, AIC_poi = AIC_poi)
+##   AIC_nb  AIC_poi 
+## 127191.9 127677.6
+```
+
+Smaller is better, thus preferred distribution is the Negative Binomial based on AIC!
+
+---
+
+class: clear
+
+Next to this, we compare the .KULbginline[observed and fitted claim count] distribution. 
+
+For example, with the fitted Negative Binomial distribution
+
+
+```r
+observed_count = rep(0, 5)
+model_based_count = rep(0, 5)
+
+for(i in 1:5) {
+  observed_count[i] = sum(mtpl$nclaims == i-1)
+  model_based_count[i] = sum(dnbinom(i-1, size = freq_glm_nb$theta, mu = fitted(freq_glm_nb)))
+}
+
+data.frame(frequency = 0:4,
+           observed_count = observed_count,
+           model_based_count = round(model_based_count))
+##   frequency observed_count model_based_count
+## 1         0         144936            145014
+## 2         1          16556             16347
+## 3         2           1558              1685
+## 4         3            162               167
+## 5         4             17                16
+```
+
+How would you explain the code (in your own words)? Can you adjust the code to the Poisson distribution?
+
+---
+
+# Excess zeroes in claim count data
+
+Standard count distributions have often difficulty to capture the large number of zeroes in claim frequency data.
+
+We propose two strategies to model an .KULbginline[excessive number of zeroes].
+
+With a .KULbginline[Zero-Inflated (ZI)] distribution:
+
+$$ 
+P(N^{ZI} = k) = 
+`\begin{cases}
+\pi + (1-\pi) \cdot P(N=0) &amp; k = 0 \\
+(1-\pi) \cdot P(N = k) &amp; k \gt 0.
+\end{cases}`
+$$
+Zero-inflated count models are two-component mixture models combining a point mass at zero with a proper count distribution. Thus, there are two sources of zeroes: zeroes may come from both the point mass and from the count component. 
+
+With a .KULbginline[Hurdle] distribution: 
+
+$$ 
+P(N^{hurdle} = k) = 
+`\begin{cases}
+\pi &amp; k = 0 \\
+(1-\pi)\cdot \frac{P(N=k)}{1-P(N = 0)} &amp; k \gt 0.
+\end{cases}`
+$$
+How can we fit these distributions to given data with R?
+
+---
+
+class: clear
+
+.pull-left[
+The [library {pscl}](https://github.com/atahk/pscl) enables maximum likelihood estimation of zero-inflated and hurdle models for count data.
+
+
+```r
+library(pscl)
+f_ZIP &lt;- zeroinfl(nclaims ~ 1, offset = log(expo), 
+                  dist = "poisson", data = mtpl)
+summary(f_ZIP)
+## 
+## Call:
+## zeroinfl(formula = nclaims ~ 1, data = mtpl, offset = log(expo), dist = "poisson")
+## 
+## Pearson residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.3584 -0.3584 -0.3584 -0.2976 36.1142 
+## 
+## Count model coefficients (poisson with log link):
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -1.48286    0.02226  -66.63   &lt;2e-16 ***
+## 
+## Zero-inflation model coefficients (binomial with logit link):
+##             Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept) -0.46932    0.05483   -8.56   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+## 
+## Number of iterations in BFGS optimization: 11 
+## Log-likelihood: -6.362e+04 on 2 Df
+```
+
+
+]
+
+.pull-right[
+
+The `dist = .` available in `zeroinfl(.)` are the Poisson, Negative Binomial and the geometric distribution.
+
+The `offset = .` is an a priori known component to be included in the linear predictor of the count model (as we did before).
+
+Usually the count model is a Poisson or negative binomial regression (with log link). 
+
+A binary model is used that captures the probability of zero inflation. In the simplest case only with an intercept but potentially containing regressors. 
+For this zero-inflation model, a binomial model with different links can be used, typically logit or probit.
+
+]
+
+---
+
+class: clear
+
+More detailed inspection of the output stored in `f_ZIP`
+
+
+```r
+f_ZIP$coefficients
+## $count
+## (Intercept) 
+##   -1.482859 
+## 
+## $zero
+## (Intercept) 
+##  -0.4693167
+(f_ZIP_lambda &lt;- exp(as.numeric(f_ZIP$coefficients[1])))
+## [1] 0.2269878
+(f_ZIP_pi &lt;- exp(as.numeric(f_ZIP$coefficients[2]))/(1+exp(as.numeric(f_ZIP$coefficients[2]))))
+## [1] 0.384778
+(AIC_ZIP &lt;- 2*length(f_ZIP$coefficients) - 2*f_ZIP$loglik)
+## [1] 127241.3
+```
+
+The mean and variance (for `expo == 1`) as captured by the ZIP
+
+
+```r
+(ZIP_mean &lt;- (1-f_ZIP_pi)*f_ZIP_lambda)
+## [1] 0.1396479
+(ZIP_var &lt;- (1-f_ZIP_pi)*f_ZIP_lambda*(1+f_ZIP_pi*f_ZIP_lambda))
+## [1] 0.1518447
+```
+
+---
+
+class: clear
+
+A handcrafted MLE with the .KULbginline[ZIP distribution] can be put together as
+
+
+```r
+neg_loglik_ZIP &lt;- function(par, freq, expo){
+  lambda &lt;- expo*exp(par[1])
+  p &lt;- exp(par[2])/(1+exp(par[2]))
+  
+  -sum((freq == 0) * (log(p + (1-p)*dpois(0, lambda, log = FALSE)))) - 
+    sum((freq != 0) * (log((1-p)) + dpois(freq, lambda, log = TRUE)))
+}
+
+sol_ZIP &lt;- nlm(neg_loglik_ZIP, c(1, 1), hessian = TRUE, 
+              freq = mtpl$nclaims, expo = mtpl$expo)
+sol_ZIP$estimate
+## [1] -1.4829209 -0.4694681
+```
+
+and their corresponding standard errors
+
+
+```r
+(sol_ZIP_se &lt;- sqrt(diag(solve(sol_ZIP$hessian))))
+## [1] 0.02224688 0.05480811
+```
+
+---
+
+name: yourturn
+class: clear
+
+.left-column[
+
+&lt;!-- Add icon library --&gt;
+&lt;link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"&gt;
+
+## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
+
+
+]
+
+.right-column[
+
+.hi-pink[Q]: as a final challenge
+
+1. Adjust the code of the ZIP to fit the hurdle Poisson model, use `pscl::hurdle()`.
+
+2. Starting from the handcrafted ZIP likelihood, write code for the hurdle Poisson model.
+
+
+]
+
+---
+
+class: inverse, center, middle
+name: severity
+
+# Fitting severity models in R
+
+---
+
+name: freq-sev approach 
+
+# From simple to complex parametric distributions
+
+.pull-left[
+
+Famous examples of .KULbginline[1 and 2 parameter distributions] used in loss modelling: 
+
+- Exponential
+- Lognormal
+- Gamma and Inverse Gaussian.
+
+Some less straightforward .KULbginline[more flexible parametric distributions]: 
+
+- Burr (3 parameters)
+- GB2 (4 parameters).
+
+Typically challenging to fit, picking meaningful starting values in numerical optimization routines matters!
+
+
+]
+
+.pull-right[
+
+&lt;center&gt;
+&lt;img src="image/LossModels.jpg" width="300"/&gt;
+&lt;/center&gt;
+
+
+]
+
+---
+
+class: clear
+
+&lt;br/&gt;
+
+&lt;br/&gt;
+
+Distribution           |   Density | Mean  |  R  | 
+:-------------------------|:-------------------------|:-------------------------|
+Exponential | `\(f(y) = \displaystyle \lambda e^{-\lambda y}\)` | `\(\text{E}[Y] = \displaystyle 1/\lambda\)`  | `dexp` ... 
+Gamma | `\(f(y) = \displaystyle \frac{1}{\Gamma(\alpha)}\beta^{\alpha}y^{\alpha-1}e^{-\beta y}\)` | `\(\text{E}[Y] = \displaystyle \alpha/\beta\)`  | `dgamma` ...
+Inverse Gaussian | `\(f(y) = \displaystyle \left(\frac{\lambda}{2\pi y^3}\right)^{1/2}\exp{\left[\frac{-\lambda(y-\mu)^2}{2\mu^2y}\right]}\)` | `\(\text{E}[Y] = \mu\)`  | `dinvgaus` package {statmod}
+Lognormal | `\(f(y) = \displaystyle \frac{1}{\sqrt{2\pi} \sigma y}\exp{\left[-\frac{1}{2} \left(\frac{\log{y}-\mu}{\sigma}\right)^2\right]}\)` | `\(\text{E}[Y] = \displaystyle \exp{\left(\mu+\frac{1}{2}\sigma^2\right)}\)` | `dlnorm` ...
+
+The {actuar} package has some functions related to the Burr and GB2 distributions, e.g. `dburr` and `dgenbeta`.
+
+Mind the .KULbginline[different parametrizations] of these distributions!
+
+---
+
+# Be aware of truncation!
+
+In `secura` only losses .KULbginline[above 1.2M EUR] are registered. 
+
+We can picture this as follows: 
+
+&lt;center&gt;
+&lt;img src="image/trunc_pic.png" width="500"/&gt;
+&lt;/center&gt;
+
+Lower/left truncation: deductible, reinsurance.
+
+Upper/right truncation: earthquake magnitudes.
+
+How would you tackle this left-truncation in `secura` when fitting a loss distribution to the data?
+
+---
+
+# Be aware of truncation and censoring!
+
+&lt;center&gt;
+&lt;img src="image/cens_trunc_pic.png" width="900"/&gt;
+&lt;/center&gt;
+
+---
+
+# Global fitting distributions
+
+.pull-left[
+How to find/to construct a .KULbginline[global fit] of insurance losses?
+
+That's .KULbginline[hard], because: 
+
+- different behaviour of attritional and large losses (body vs tail).
+
+Typically, no standard parametric distribution provides suitable global fit: 
+
+- Lognormal, Weibull, etc. underestimate tail risk
+- Pareto, Generalised Pareto Distribution (GPD), etc. can only be used for large losses
+- complex distributions (e.g. GB2).
+
+]
+
+.pull-right[
+
+.KULbginline[Splicing (or composite modeling)] offers a useful strategy to construct a global fit.
+
+Intuitively: 
+
+- different components on different intervals of losses
+- glue these components together into a well-defined density.
+
+This technique is popular e.g. in modelling operational risk data. 
+
+]
+
+---
+
+# Splicing: a body-tail example
+
+.pull-left[
+Combine two distributions (one for the .KULbginline[body] and one for the .KULbginline[tail]) in a splicing model:
+
+`$$f(x;\boldsymbol{\Theta}) = \begin{cases}
+	0 &amp; \quad \text{if }x&lt; t^l \\
+	\pi \frac{f_1^*(x;t,\boldsymbol{\Theta}_1)}{F_1^*(t;\boldsymbol{\Theta}_1)-F_1^*(t^l;\boldsymbol{\Theta}_1)} &amp; \quad \text{if }t^l \leq x\leq t \\
+	(1-\pi) \frac{f_2^*(x;t,\boldsymbol{\Theta}_2)}{1-F_2^*(t;\boldsymbol{\Theta}_1)} &amp;\quad \text{if } x &gt; t,
+	\end{cases}$$`
+
+where `\(t^l\)` is the .KULbginline[left-truncation point] and `\(t\)` the .KULbginline[split point] (body vs. tail).
+
+Questions for you: 
+
+- which in the above should be estimated from the data?
+- why the conditional densities, 
+  constructed from original pdf's `\(f_1^*(.)\)` and `\(f_2^*(.)\)` on the positive real line?
+
+]
+
+.pull-right[
+
+Some examples of body-tail fits: 
+
+Body           |   Tail 
+:-------------------------|:-------------------------|
+		Exponential			|	Pareto 
+		Lognormal			|	Pareto
+		Weibull				|	Pareto
+		Mixture of two exponentials	|	Generalised Pareto 
+
+]
+
+---
+
+# A body-tail fit for the Secura Re losses
+
+Let's combine an .KULbginline[exponential] (body - below threshold `\(t\)`) and a .KULbginline[Pareto] (tail - above `\(t\)`)
+
+`$$\begin{eqnarray*}
+f(x) &amp;=&amp; \begin{cases}
+	0 &amp; x \leq t^l \\
+	\pi \cdot \color{blue}{\frac{f_1^{\star}(x)}{F_1^{\star}(t)-F_1^{\star}(t^l)}} &amp; t^l \leq x \leq t \\
+(1-\pi) \cdot \color{orange}{\frac{f_2^{\star}(x)}{1-F_2^{\star}(t)}} &amp; x &gt; t \end{cases},
+\end{eqnarray*}$$`
+
+with 
+
+- `\(f_1^{\star}\)` and `\(F_1^{\star}\)` the PDF and CDF of an exponential distribution
+
+`$$\begin{eqnarray*}
+\frac{f_1^{\star}(x)}{F_1^{\star}(t)-F_1^{\star}(t^l)} &amp;=&amp; \frac{\lambda \exp\{-\lambda x\}}{\exp\{-\lambda \cdot t^l\}-\exp\{-\lambda \cdot t\}}=\frac{\lambda \exp\{-\lambda (x-t^l)\}}{1-\exp\{-\lambda(t-t^l)\}},
+\end{eqnarray*}$$`
+
+- `\(f_2^{\star}\)` and `\(F_2^{\star}\)` the PDF and CDF of a Pareto distribution with unit scale
+
+`$$\begin{eqnarray*}
+\frac{f_2^{\star}(x)}{1-F_2^{\star}(t)} &amp;=&amp; \frac{\frac1{\gamma} x^{-\frac1{\gamma}-1}}{t^{-\frac1{\gamma}}}.
+\end{eqnarray*}$$`
+
+---
+
+# Choice of threshold
+
+.pull-left[
+
+Techniques from .KULbginline[extreme value theory (EVT)] are necessary to estimate .KULbginlin[split point] above which a Pareto distribution is plausible.
+
+A first visual tool is the .KULbginline[mean excess plot]: 
+
+- the mean excess function or mean residual life function is
+
+`$$e(t) = E(X-t|X&gt;t)$$`
+
+- empirically, using a sample `\((x_1,\ldots,x_n)\)`
+
+`$$\hat{e}_n(t) = \frac{\sum_{i=1}^n x_i \boldsymbol{1}_{(t,\infty)}(x_i)}{\sum_{i=1}^n \boldsymbol{1}_{(t,\infty)}(x_i)}-t.$$`
+- the mean excess plot evaluates the above at values `\(t=x_{n-k,n}\)`, the `\((k+1)\)`th largest observation.
+
+]
+
+.pull-right[
+
+The {ReIns} package implements many useful functions from this book:
+
+
+&lt;center&gt;
+&lt;img src="image/ReIns.jpg" width="300"/&gt;
+&lt;/center&gt;
+
+]
+
+
+---
+
+class: clear
+
+.pull-left[
+
+Via {ReIns} we can easily plot the mean excess function: 
+
+
+```r
+library(ReIns)
+ReIns::MeanExcess(secura$Loss)
+```
+
+By default, the mean excess scores are plotted as a function of the data `k = FALSE`. 
+
+You can also plot these as function of the tail parameter `k = TRUE`.
+
+The mean excess function of an EXP distribution is constant, then: 
+
+- .KULbginline[HTE] ('Heavier than exponential'), mean excess function .KULbginline[ultimately increases]
+
+- .KULbginline[LTE] ('Lighter than exponential'), when mean excess function .KULbginline[ultimately decreases].
+
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-59-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+A second visual tool is a QQplot, e.g. the .KULbginline[Exponential QQplot]:
+
+- recall `\(F_{\lambda}(x) = 1-\exp{(-\lambda x)}\)` with `\(x&gt;0\)`
+
+- then `\(Q_{\lambda}(p) = -\frac{1}{\lambda} \log{(1-p)}\)` for `\(p \in (0,1)\)`
+
+- use `\(p_{i,n} := i/(n+1)\)` and plot
+
+`$$(-\log{(1-p_{i,n})},x_{i,n}).$$`
+
+]
+
+.pull-right[
+
+
+
+```r
+ReIns::ExpQQ(secura$Loss)
+```
+
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-61-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+A second visual tool is a QQplot, e.g. the .KULbginline[Pareto QQplot]:
+
+- recall `\(F_{\gamma}(x) = 1-x^{-1/\gamma}\)` with `\(x&gt;0\)`
+
+- then `\(-\log{(1-p)} = \frac{1}{\gamma} \log x\)` for `\(p \in (0,1)\)`
+
+- use `\(p_{i,n} := i/(n+1)\)` and plot
+
+`$$(-\log{(1-p_{i,n})},\log x_{i,n}).$$`
+
+A distribution is of Pareto-type when the Pareto QQplot is ultimately linear near the largest observations.
+
+]
+
+.pull-right[
+
+
+
+```r
+ReIns::ParetoQQ(secura$Loss)
+```
+
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-63-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+
+]
+
+
+---
+
+# Choice of threshold - the Hill estimator
+
+.pull-left[
+
+We estimate the slope of the Pareto QQplot to the right of the reference point
+
+`$$(-\log{(\frac{k+1}{n+1})},\log x_{n-k,n}).$$`
+This slope can be expressed as
+
+`$$H_{k,n} = \frac{1}{k} \sum_{j=1}^k \log X_{n-j+1,n} - \log X_{n-k,n}.$$`
+
+When the data has a Pareto tail the Hill plot becomes linear.
+
+But mind the bias and variance trade off!
+
+]
+
+.pull-right[
+
+
+```r
+H &lt;- ReIns::Hill(secura$Loss, k = FALSE, 
+                 lwd = 2, plot = TRUE, main = "")
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-65-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+# Choice of threshold - the Hill estimator
+
+.pull-left[
+
+We estimate the slope of the Pareto QQplot to the right of the reference point
+
+`$$(-\log{(\frac{k+1}{n+1})},\log x_{n-k,n}).$$`
+This slope can be expressed as
+
+`$$H_{k,n} = \frac{1}{k} \sum_{j=1}^k \log X_{n-j+1,n} - \log X_{n-k,n}.$$`
+
+When the data has a Pareto tail the Hill plot becomes linear.
+
+But mind the bias and variance trade off!
+
+]
+
+.pull-right[
+
+
+```r
+H &lt;- ReIns::Hill(secura$Loss, k = TRUE, 
+                 lwd = 2, plot = TRUE, main = "")
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-67-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+
+class: clear
+
+.pull-left[
+
+The Hill plot shows many possible estimates for `\(\gamma\)` in the Pareto distribution `\(F(x)=1-x^{-1/\gamma}\)` that we want to use for the tail of the distribution.
+
+.KULbginline[How to pick the split point?]
+
+We consider the Asymptotic Mean Squared Error of `\(H_{k,n}\)` (i.e. variance + squared bias).
+
+We plot
+
+`$$(k,\widehat{\text{AMSE}}(H_{k,n}));k=1,\ldots, n-1\}$$`
+
+and pick the `\(k\)` that minimizes the AMSE.
+
+]
+
+
+.pull-right[
+
+
+```r
+H &lt;- ReIns::Hill(secura$Loss, lwd = 2, plot = TRUE, 
+                 main = "")
+kopt &lt;- ReIns::Hill.kopt(secura$Loss, 
+                         plot = FALSE)$kopt
+abline(v = kopt, lwd = 2, lty = 2)
+```
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-69-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+Using these insights from EVT we arrive at a .KULbginline[final choice] for the split point or threshold `\(t\)`.
+
+We pick the optimal `\(k\)` by minimizing AMSE of the Hill estimator.
+
+Then, the corresponding split point or threshold `\(t := X_{n-k,n}\)`, the `\((k+1)\)`th largest observation in the sample.
+
+This reasoning also gives `\(\hat{\gamma}\)` via the corresponding `\(H_{k,n}\)`. 
+
+]
+
+.pull-right[
+
+
+```r
+# sample size
+n &lt;- length(secura$Loss)
+n
+## [1] 371
+
+# Hill estimator
+kopt &lt;- Hill.kopt(secura$Loss, plot = FALSE)$kopt
+kopt
+## [1] 95
+
+# chosen threshold
+threshold &lt;- sort(secura$Loss)[n - kopt]
+threshold
+## [1] 2580026
+
+# estimate for gamma using Hill estimator
+gamma &lt;- H$gamma[kopt]
+gamma
+## [1] 0.2710874
+```
+
+
+]
+
+---
+
+# Exponential - Pareto splicing model 
+
+We are now ready to fit the .KULbginline[body-tail] model proposed earlier on:
+
+`$$\begin{eqnarray*}
+f(x) &amp;=&amp; \begin{cases}
+	0 &amp; x \leq t^l \\
+	\pi \cdot \color{blue}{\frac{f_1^{\star}(x)}{F_1^{\star}(t)-F_1^{\star}(t^l)}} &amp; t^l \leq x \leq t \\
+(1-\pi) \cdot \color{orange}{\frac{f_2^{\star}(x)}{1-F_2^{\star}(t)}} &amp; x &gt; t \end{cases},
+\end{eqnarray*}$$`
+
+with 
+
+- `\(f_1^{\star}\)` and `\(F_1^{\star}\)` the PDF and CDF of an exponential distribution
+
+`$$\begin{eqnarray*}
+\frac{f_1^{\star}(x)}{F_1^{\star}(t)-F_1^{\star}(t^l)} &amp;=&amp; \frac{\lambda \exp\{-\lambda x\}}{\exp\{-\lambda \cdot t^l\}-\exp\{-\lambda \cdot t\}}=\frac{\lambda \exp\{-\lambda (x-t^l)\}}{1-\exp\{-\lambda(t-t^l)\}},
+\end{eqnarray*}$$`
+
+- `\(f_2^{\star}\)` and `\(F_2^{\star}\)` the PDF and CDF of a Pareto distribution with unit scale
+
+`$$\begin{eqnarray*}
+\frac{f_2^{\star}(x)}{1-F_2^{\star}(t)} &amp;=&amp; \frac{\frac1{\gamma} x^{-\frac1{\gamma}-1}}{t^{-\frac1{\gamma}}}.
+\end{eqnarray*}$$`
+
+---
+
+class: clear
+
+In fact, we now have meaningful choices/estimates for:
+
+- `\(t^l\)` left truncation point at 1.2M EUR
+
+- `\(t\)` the split point estimated at `threshold`
+
+```r
+threshold
+## [1] 2580026
+```
+
+- the Hill estimator in `gamma`
+
+```r
+gamma
+## [1] 0.2710874
+```
+
+- the fraction of losses below the split point
+
+```r
+(p &lt;- sum(secura$Loss &lt;= threshold)/n)
+## [1] 0.7439353
+```
+or 
+
+```r
+(n-kopt)/n
+## [1] 0.7439353
+```
+
+---
+
+class:clear
+
+
+
+```r
+sh &lt;- 1200000 # shift
+I &lt;- secura$Loss &lt;= threshold # indicator
+
+neg.loglik &lt;- function(par) {
+	lambda &lt;- exp(par[1]); alpha &lt;- exp(par[2]) 
+	# likelihood
+	L &lt;- I * (n-kopt)/n * lambda * exp(-lambda*(secura$Loss-sh))/(1 - exp(-lambda*(threshold-sh))) + 
+		(1-I) * kopt/n * alpha * (secura$Loss)^(-alpha-1)/(threshold)^(-alpha)
+	# negative log-likelihood
+	-sum(log(L)) 
+}
+
+m1 &lt;- mean(secura$Loss)
+par.init &lt;- c(1/(m1-sh), 1/m1)
+oo &lt;- nlm(neg.loglik, log(par.init))
+(lambda &lt;- exp(oo$estimate[1])) 
+## [1] 6.710413e-07
+(alpha &lt;- exp(oo$estimate[2]))
+## [1] 3.688812
+(gamma &lt;- 1/alpha)
+## [1] 0.27109
+```
+
+---
+
+class: clear
+
+By working out the integrals starting from the spliced density, we find:
+
+for `\(t^l=1,200,000\leq x \leq t\)`:
+
+`$$\begin{eqnarray*}
+F(x) &amp;=&amp; \pi \cdot \frac{1-\exp\{-\lambda(x-\text{1,200,000})\}}{1-\exp\{-\lambda(t-\text{1,200,000})\}}.
+\end{eqnarray*}$$`
+
+and for `\(x&gt;t\)` we find 
+
+`$$F(x)=1-(1-\pi) \left( \frac{x}{t} \right)^{-\frac1{\gamma}}.$$`
+
+Note the different expressions for the CDF for the different ranges of `\(x\)` values!
+
+---
+
+class: clear
+
+Following function can be used the compute the .KULbginline[CDF of the spliced distribution] (try the integrals!)
+
+
+```r
+# CDF for Exp-Pa splicing model
+ExpPa_cdf &lt;- function(x, sh, threshold, lambda, gamma) {
+  
+  p &lt;- numeric(length(x))
+  
+  p[x &lt;= threshold] &lt;- (n - kopt) / n * pexp(x[x &lt;= threshold] - sh, rate = lambda) / 
+                                        pexp(threshold - sh, rate = lambda)
+  
+  p[x &gt; threshold] &lt;- 1 - kopt / n * (x[x &gt; threshold] / threshold) ^ (-1/gamma)
+  
+  return(p)
+}
+```
+
+---
+
+class: clear
+
+To assess the GoF of the fitted spliced distribution, we plot the empirical CDF together with the fitted CDF.
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-77-1.svg" width="40%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# A mixture of Erlangs for the body
+
+.pull-left[
+
+What if it is not straightforward to find a suitable distribution for the .KULbginline[body of the data]?
+
+.KULbginline[Mixtures of Erlangs]: 
+
+- versatile class of distributions, i.e. dense in the space of positive, continuous distributions
+- mathematically tractable
+- fitting procedure in {ReIns} package.
+
+But, a ME distribution has an .KULbginline[exponential tail], thus no heavy tails! 
+
+More details in [Verbelen et al. (2015, ASTIN Bulletin)](https://katrienantonio.github.io/portfolio/loss-models).
+
+]
+
+.pull-right[
+
+The pdf of a mixture of Erlangs:
+
+`$$\begin{align*}
+						f_X(x ; \boldsymbol{\alpha}, \boldsymbol{r}, \theta) &amp;= \sum_{j=1}^{M} \alpha_j f_E(x;r_j, \theta) \\
+						&amp;= \sum_{j=1}^{M} \alpha_j \frac{x^{r_j-1} 	e^{-x/\theta}}{\theta^{r_j}(r_j-1)!},
+\end{align*}$$`
+
+with number of Erlangs `\(M\)`, mixing weights `\(\boldsymbol{\alpha}\)`, common scale `\(\theta\)` and positive integer shape parameters `\((r_1,\ldots, r_M)\)`.
+
+The mixing weights should satisfy `\(\alpha_j&gt;0\)` and `\(\sum_j \alpha_j = 1\)`.
+
+Question for you: the Erlang distribution may remind you of a better known distribution among actuaries. Which one?
+
+]
+
+
+---
+
+class: clear
+
+.pull-left[
+
+```r
+# Fit ME model using internal function from 
+# ReIns package
+MEfit_sec &lt;- ReIns:::.ME_tune(secura$Loss, 
+                              trunclower = sh, 
+                              criterium = "BIC", 
+                              M = 10, 
+                              s = 1:40)$best_model
+
+# Fitted parameters
+MEfit_sec$alpha
+## [1] 0.9707281 0.0292719
+MEfit_sec$shape
+## [1]  5 16
+MEfit_sec$theta
+## [1] 359731.4
+```
+]
+
+.pull-right[
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-79-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+
+```r
+ME_VaR &lt;- Vectorize(ReIns:::.ME_VaR, 
+                    vectorize.args = "p")
+
+# QQ-plot
+plot(ME_VaR((1:n) / (n+1), theta = MEfit_sec$theta, 
+            shape = MEfit_sec$shape, 
+            alpha = MEfit_sec$alpha, 
+            trunclower = sh), 
+     sort(secura$Loss), 
+     main = "ME QQ-plot", 
+     xlab = "Fitted quantiles", 
+     ylab = "Empirical quantiles")
+abline(0, 1)
+```
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-81-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+Next, we combine what we learned on splicing with the Mixture of Erlangs distribution, to construct .KULbginline[a ME-Pa splicing model] with the splicing point `threshold` estimated earlier on. 
+
+Again, we start from `\(M=10\)` Erlangs in the mixture part for the body. 
+
+
+```r
+# Fit ME-Pa splicing model
+splicefit_sec &lt;- ReIns::SpliceFitPareto(
+                    secura$Loss, 
+                    tsplice = threshold, 
+                    M = 10, 
+                    trunclower = sh)
+
+# Summary
+summary(splicefit_sec)
+```
+
+How would you describe the resulting model?
+
+]
+
+.pull-right[
+
+.tiny[
+
+```
+## 
+## ----------------------------------------
+## Summary of splicing fit
+## ----------------------------------------
+## 
+## const = 0.744
+## 
+## pi = (0.744, 0.256)
+## 
+## t0 = 1 200 000
+## 
+## t = 2 580 026
+## 
+## type = (ME, Pa)
+## 
+## * * * * * * * * * * * * * * * * * * * * 
+## 
+## p = 1
+## 
+## r = 7
+## 
+## theta = 249 142
+## 
+## M = 1
+## 
+## M_initial = 10
+## 
+## * * * * * * * * * * * * * * * * * * * * 
+## 
+## gamma = 0.271
+## 
+## endpoint = Inf
+```
+]
+]
+
+---
+
+class: clear
+
+.pull-left[
+
+The first way to assess the GoF is a plot of the ECDF and the fitted CDF.
+
+```r
+# ECDF plot
+x &lt;- seq(10^6, 10^7, 10^3)
+SpliceECDF(x, secura$Loss, splicefit_sec, lwd = 2)
+abline(v = splicefit_sec$t, lty = 2, lwd = 2)
+
+# Zoomed ECDF plot
+SpliceECDF(x, secura$Loss, splicefit_sec, 
+           lwd = 2, ylim = c(0,0.3))
+abline(v = splicefit_sec$t, lty = 2, lwd = 2)
+```
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-85-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+
+class: clear
+
+.pull-left[
+
+The first way to assess the GoF is a plot of the ECDF and the fitted CDF.
+
+```r
+# ECDF plot
+x &lt;- seq(10^6, 10^7, 10^3)
+SpliceECDF(x, secura$Loss, splicefit_sec, lwd = 2)
+abline(v = splicefit_sec$t, lty = 2, lwd = 2)
+
+# Zoomed ECDF plot
+SpliceECDF(x, secura$Loss, splicefit_sec, 
+           lwd = 2, ylim = c(0,0.3))
+abline(v = splicefit_sec$t, lty = 2, lwd = 2)
+```
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-87-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+
+---
+
+class: clear
+
+.pull-left[
+
+Additionally, a PP-plot can be used which plots the empirical survival function vs. the fitted survival function.
+To focus on the tails, a version with minus log-scale is also used, i.e.
+
+`$$-\log(1-\hat{F}(x_{i,n}))\ \text{vs.}\ -\log(1-F(x_{i,n})).$$`
+
+
+```r
+# PP-plot
+SplicePP(secura$Loss, splicefit_sec)
+# PP-plot with minus log-scale
+SplicePP(secura$Loss, splicefit_sec, log = TRUE)
+```
+
+
+
+]
+
+.pull-right[
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-89-1.svg" width="50%" style="display: block; margin: auto;" /&gt;
+
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-90-1.svg" width="50%" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+
+class: clear
+
+.pull-left[
+Finally, a QQ-plot can be used again.
+
+```r
+# QQ-plot
+SpliceQQ(secura$Loss, splicefit_sec)
+```
+]
+.pull-right[
+&lt;img src="loss_modelling_reserving_analytics_day_1_files/figure-html/unnamed-chunk-92-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+
+---
+# Risk measures
+
+Some popular risk measures are
+
+* Value-at-Risk
+
+$$ VaR_{1-p} = F^{-1}(1-p)$$
+
+* Value-at-Risk quantifies tail events.
+
+&lt;br&gt;
+
+* Conditional Tail Expectation 
+
+`\begin{align}
+CTE_{1-p} &amp;= E(X \mid X &gt; VaR_{1-p}) \\
+          &amp;= \frac{1}{p} \int_{1-p}^{1} VaR_\gamma(X) d\gamma.
+\end{align}`
+
+* Conditional Tail Expectation quantifies the expected severity of tail events (.KULbginline[what if?]).
+
+---
+# Risk measures for a body-tail fit
+
+We give a general expression for the CDF and quantile function for the body-tail model:
+
+`$$\begin{eqnarray*}
+f(x) &amp;=&amp; \begin{cases}
+	0 &amp; x \leq t^l \\
+	\pi \cdot \color{blue}{\frac{f_1^{\star}(x)}{F_1^{\star}(t)-F_1^{\star}(t^l)}} &amp; t^l \leq x \leq t \\
+(1-\pi) \cdot \color{orange}{\frac{f_2^{\star}(x)}{1-F_2^{\star}(t)}} &amp; x &gt; t \end{cases}
+\end{eqnarray*}$$`
+
+&lt;br&gt;
+
+.pull-left[
+The CDF is found by integrating the density:
+
+$$
+`\begin{eqnarray*}
+F(x) &amp;=&amp; \begin{cases}
+	0 &amp; x \leq t^l \\
+	\pi \cdot \color{blue}{\frac{F_1^{\star}(x) - F_1^{\star}(t^l)}{F_1^{\star}(t)-F_1^{\star}(t^l)}} &amp; t^l \leq x \leq t \\
+\pi + (1-\pi) \cdot \color{orange}{\frac{F_2^{\star}(x) - F_2^{\star}(t)}{1-F_2^{\star}(t)}} &amp; x &gt; t \end{cases}
+\end{eqnarray*}`
+$$
+]
+
+.pull-left[
+The quantile function is obtained by inverting the CDF:
+$$
+`\begin{eqnarray*}
+F^{-1}(p) &amp;=&amp; \begin{cases}
+Q_1^{*} \left( \frac{p}{\pi} \cdot \color{blue}{ (F_1^{\star}(t) - F_1^{\star}(t^l)) + F_1^{\star}(t^l)} \right)  &amp; 0 \leq p \leq \pi \\
+Q_2^{*} \left( \frac{p-\pi}{1-\pi} \cdot \color{orange}{(1 - F_2^{\star}(t)) +F_2^{\star}(t)} \right) &amp; \pi \leq p \leq 1 \end{cases}
+\end{eqnarray*}`
+$$
+where `\(Q_1^{*}\)` and `\(Q_2^{*}\)` denote the quantile functions of the body resp. tail distribution used in the splicing model.
+]
+---
+# Risk measures for a body-tail fit
+
+
+```r
+# Quantile function for Exp-Pa splicing model
+ExpPa_quantile &lt;- function(p, sh, threshold, lambda, gamma) {
+  
+  pi &lt;- (n-kopt)/n
+  
+  x &lt;- numeric(length(p))
+  
+  x[p &lt;= pi] &lt;- qexp(p[p &lt;= pi] / pi * (pexp(threshold, rate = lambda) - pexp(sh, rate = lambda)) + 
+                       pexp(sh, rate = lambda), rate = lambda)
+  
+  x[p &gt; pi] &lt;- threshold * (1 - (p[p &gt; pi] - pi) / (1-pi))^(-gamma)
+
+  return(x)
+}
+```
+
+---
+# Risk measures for a body-tail fit
+
+.pull-left[
+95% Value-at-Risk
+
+
+```r
+ExpPa_quantile(0.95, sh, threshold, lambda, gamma)
+## [1] 4017259
+```
+
+and check
+
+
+```r
+ExpPa_cdf(ExpPa_quantile(0.95, sh, 
+                         threshold, 
+                         lambda, gamma), 
+          sh, threshold, lambda, gamma)
+## [1] 0.95
+```
+
+
+]
+
+.pull-right[
+95% Conditional Tail Expectation
+
+
+```r
+qf &lt;- function(p) {
+  ExpPa_quantile(p, sh, threshold, lambda, gamma) 
+}
+
+int &lt;- integrate(qf, lower = 0.95, upper = 1) 
+int$value / 0.05
+## [1] 5511323
+```
+
+&lt;br/&gt;
+
+The {ReIns} package has built-in functions to calculate these (and other) risk measures for the ME-Pa spliced fit, see e.g. `ReIns::VaR(p, splicefit_sec)` and `ReIns::CTE(p, splicefit_sec)`. 
+
+]
+
+
+---
+name: wrap-up
+
+# Thanks!  &lt;img src="image/xaringan.png" class="title-hex"&gt;
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+Slides created with the R package [xaringan](https://github.com/yihui/xaringan).
+&lt;br&gt; &lt;br&gt; &lt;br&gt;
+Course material available via 
+&lt;br&gt;
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud-2020
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightLanguage": "R",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"highlightSpans": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
