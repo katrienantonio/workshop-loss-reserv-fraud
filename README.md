@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud* course in November 2020.
 
-📆 November 25, 26 and 27, 2020 <br> 🕤 From 9.30 am to 12.30 pm <br> 📍
+📆 November 25, 26 and 27, 2020 <br> 🕖 From 9.30 am to 12.30 pm <br> 📌
 online
 
 Course materials will be posted in the days before the workshop.
@@ -65,7 +65,7 @@ The detailed schedule is subject to small changes.
 |         | 10.45 - 11.20 | Claims reserving with triangles                                    | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)            |
 |         | 11.30 - 12.10 | When the chain ladder method fails                                 | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)        |
 |         | 12.10 - 12.30 | Research outlook                                                   | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)       |
-|  Day 3  | 09.30 - 10.00 | Motivation and fraud detection cycle                               |                                                                                                                                                                                                                                                                                                          |
+|  Day 3  | 09.30 - 10.00 | Motivation and fraud detection cycle                               | sheets in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day3/2020-11-26%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf)                                                                                                                                         |
 |         | 10.00 - 10.20 | Network and tabular data                                           |                                                                                                                                                                                                                                                                                                          |
 |         | 10.30 - 11.00 | Ranking algorithm                                                  |                                                                                                                                                                                                                                                                                                          |
 |         | 11.00 - 11.20 | Featurization                                                      |                                                                                                                                                                                                                                                                                                          |
@@ -118,7 +118,8 @@ Topics include:
   - evaluation metrics, eg AUROC, AUPR, top decile lift
   - wrap up.
 
-Download lecture sheets TBC.
+Download lecture sheets
+[pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day3/2020-11-26%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf).
 
 ## After the workshop: want to more know?
 

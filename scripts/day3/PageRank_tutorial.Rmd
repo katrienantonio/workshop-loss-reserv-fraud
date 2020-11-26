@@ -1,0 +1,534 @@
+---
+title: "A PageRank Tutorial"
+author: "Katrien Antonio and Eva Verschueren"
+date: "November 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<style>
+body {
+text-align: justify}
+</style>
+
+The information and examples below are mainly based on the following references.  
+  
+  
+  * Brin, S., Motwani, R., Page, L., Winograd, T. (1998). The PageRank citation ranking: Bringing order to the web. Technical Report, Stanford Infolab.
+  * Gleich, D. (2014). PageRank beyond the web.
+  * Haveliwala, T., Glen, J., Kamvar, S. (2003). An Analytical Comparison of Approaches to
+Personalizing PageRank, Stanford University.  
+  * Moreau, M. (2019). How to Perform Fraud Detection with Personalized Page Rank: along with python package Networkx. Retrieved September 12, 2019, from https://blog.sicara.com/fraud-detection-personalized-page-rank-networkx-15bd52ba2bf6  
+  * Shum, K. (2013). Advanced Engineering Mathematics: notes on PageRank algorithm. Course Notes (ENGG2012B).
+  
+
+
+## PageRank?
+
+PageRank was developed by Larry Page and Sergey Brin (co-founders of Google) in 1996 at Stanford University as an algorithm to rank websites, giving them a relative score of importance. Each website can be seen as part of a large network where the nodes (websites) of the network are linked together by hyperlinks. The algorithm needs to make sure that the most relevant websites appear first in search results.  
+  
+PageRank is based on the idea of a *random surfer* moving through the web in two different ways. First of all, a random surfer uses links on a webpage he is currently visiting to go to another webpage. The random surfer picks the next (linked) webpage at random. After a large amount of steps, websites can be ranked based on how many times they were visited by the random surfer. Websites that are visited more often are linked by many other websites, indicating how important that website is. We define the walk of the random surfer as a random walk and the rank of a website $x$ as the probability that the website is visited in that random walk through the web. Hereby, the following assumptions hold.
+  
+  * Websites linking to a certain website $x$ and having a high rank themselves should be given a higher weight in the PageRank calculation for website $x.$  
+  * Websites linking to a certain website $x$ but also linking to a high number of other websites should be given a smaller weight in the PageRank calculation for website $x.$  
+  
+In order to satisfy these assumptions, the PageRank algorithm does not only take into account the number of hyperlinks to a website, but also the rank of the websites that provide these links.  
+  
+Second, it is possible that the random surfer gets stuck on a website with no outgoing links or that he gets bored and wants to open a new website to start a new random walk through the web. Each time the random surfer visits a website, he will thus either click a random link on that website with a certain probability $d$ or he will pick a next, not necessarily linked, website at random with probability $1-d.$ This behavior of the random surfer is incorporated in the PageRank algorithm. 
+
+## The mathematics behind PageRank
+
+We now want to calculate the rank of a website $x,$ $PR(x).$ On the one hand, with probability $d$ the random surfer will visit the website $x$ at a time step $k$ in his random walk by clicking on a link originating from another website $y.$ The probability that the random surfer jumps from $y$ to $x$ at time $k$ equals the probability that the surfer is on website $y$ at time $k-1$ and opens the link to website $x.$ This is equal to the PageRank of $y$ at time $k-1$ divided by the number of outgoing links of $y,$ $L(y),$ if we assume that each link has the same probability to be chosen. In order to have the total probability that the random surfer visits website $x$ in this way, we need to sum over all the pages $y$ that link to website $x.$  
+  
+On the other hand, with probability $1-d$ a random surfer will get stuck in his walk or will decide to start another random walk. Therefore, he will pick a next website at random. If we assume that every webpage has the same probability to be chosen, the probability that $x$ is visited at time step $k$ in this way, starting from a website $y$ at time step $k-1$ equals $PR_{k-1}(y) \cdot \frac{1-d}{N},$ where $N$ is the total number of webpages. Summing over all the different nodes and taking into account that the PageRanks define a probability distribution, we find that the general probability that $x$ is visited in this way is equal to $\frac{1-d}{N}.$
+  
+The above reasoning leads to one formula for the PageRank of website $x:$
+$$ PR_k(x) = \frac{1-d}{N} + d \cdot\sum_{y \ link \ to \ x} \frac{PR_{k-1}(y)}{L(y)}. $$
+First of all, this formula makes clear that the PageRank of a website $x$ is directly proportional to the PageRank of a website $y$ that links to $x.$ Secondly, the PageRank of a website $x$ is inversely proportional to the number of outgoing links of a website $y$ that links to $x.$ We also see that $d$ reduces the effect of the linked webpages on the PageRank of $x$ and it is therefore called the *damping factor*. As a default value, Google used $d=0.85.$
+
+
+The PageRank formula for different webpages can be summarized in matrix notation. We denote
+
+$$ R_k = \begin{bmatrix} 
+PR_k(x_1) \\
+PR_k(x_2) \\
+\vdots \\
+PR_k(x_N) 
+\end{bmatrix},
+$$
+
+a vector of PageRanks at time step $k$ and 
+
+$$ m(x_i, x_j) =  \left\{ \begin{matrix} \frac{1}{L(x_j)}  & \mbox{if there exists a link from } x_j \ \mbox{to } x_i  \\ 0 & \mbox{if there does not exist a link from } x_j \ \mbox{to } x_i. \end{matrix}\right.
+$$
+
+If there are strictly positive elements on the diagonal of matrix $M$, websites have a hyperlink to itself. We then get that 
+\begin{align*} 
+
+R_k &= \frac{1-d}{N} \begin{bmatrix} 
+1 \\
+1 \\
+\vdots \\
+1 
+\end{bmatrix} + d \cdot  \begin{bmatrix} 
+m(x_1, x_1) & m(x_1, x_2) & \ldots & m(x_1, x_N)  \\
+m(x_2, x_1) & \ddots  & & \vdots \\
+\vdots & & \ddots & \\
+m(x_N, x_1) & \ldots & & m(x_N, x_N) 
+\end{bmatrix} \cdot R_{k-1} \\
+& \\
+&= \frac{1-d}{N} \cdot \mathbf{1} + d \cdot M \cdot R_{k-1}.
+\end{align*}
+  
+In order to find the PageRank of a website, we need to find a way to solve this matrix equation. Before we do so, we first look at a special case: the web contains nodes with no outgoing links, also called dangling nodes. If this is true, the matrix $M$ contains at least 1 column of zeros and the PageRank vector does not define a real probability distribution. To clarify this, suppose that website $x_j$ is a dangling node. Based on the definition of $m(x_i, x_j),$ we see that $m(x_i, x_j)=0$ for each $i \in \{1, \dots , N \},$ as there does not exist a link from $x_j$ to $x_i.$  
+  
+  
+Moreover, starting from an initial probability vector $R_0,$ $R_1$ is not a probability vector anymore. $R_0$ is a probability vector if for each $i \in \{1, \dots , N \}$ it holds that $0 < PR_0(x_i) < 1$ and $\sum_{i=n}^{N} PR_0(x_i)=1.$ For $R_1$ it then holds
+
+\begin{align*}
+R_1 &= \frac{1-d}{N} \begin{bmatrix} 
+1 \\
+1 \\
+\vdots \\
+1 
+\end{bmatrix} + d \cdot  \begin{bmatrix} 
+m(x_1, x_1) & \ldots & m(x_1, x_j) & \ldots & m(x_1, x_N)  \\
+m(x_2, x_1) & \ldots  & m(x_2, x_j) & & \vdots \\
+\vdots & & \vdots & \ddots & \\
+m(x_N, x_1) & \ldots & m(x_N, x_j) & \ldots & m(x_N, x_N) 
+\end{bmatrix} \cdot R_{0} \\ 
+& \\
+&= \frac{1-d}{N} \begin{bmatrix} 
+1 \\
+1 \\
+\vdots \\
+1 
+\end{bmatrix} + d \cdot \begin{bmatrix} 
+m(x_1, x_1) \\
+m(x_2, x_1) \\
+\vdots \\
+m(x_N, x_1) 
+\end{bmatrix} \cdot PR_0(x_1) + \ldots + d \cdot \begin{bmatrix} 
+m(x_1, x_j) \\
+m(x_2, x_j) \\
+\vdots \\
+m(x_N, x_j) 
+\end{bmatrix} \cdot PR_0(x_j) + \ldots + d \cdot \begin{bmatrix} 
+m(x_1, x_N) \\
+m(x_2, x_N) \\
+\vdots \\
+m(x_N, x_N) 
+\end{bmatrix} \cdot PR_0(x_N) \\ 
+& \\
+&= \frac{1-d}{N} \begin{bmatrix} 
+1 \\
+1 \\
+\vdots \\
+1 
+\end{bmatrix} + d \cdot \begin{bmatrix} 
+m(x_1, x_1) \\
+m(x_2, x_1) \\
+\vdots \\
+m(x_N, x_1) 
+\end{bmatrix} \cdot PR_0(x_1) + \ldots + d \cdot \begin{bmatrix} 
+0 \\
+0 \\
+\vdots \\
+0 
+\end{bmatrix} \cdot PR_0(x_j) + \ldots + d \cdot \begin{bmatrix} 
+m(x_1, x_N) \\
+m(x_2, x_N) \\
+\vdots \\
+m(x_N, x_N) 
+\end{bmatrix} \cdot PR_0(x_N).
+\end{align*}
+
+Summing over all the elements of $R_1$ we get a result strictly smaller than 1 as the term of $0<PR_0(x_j)<1$ vanishes and so it is not a probability vector anymore. The same reasoning can be applied to conclude that $R_k$ will not be a probability vector in general.  
+  
+</br>
+
+
+#### Dangling nodes
+
+The above formula only defines a real probability vector $R_k$ if the web does not contain any dangling nodes. If the random surfer visits a dangling node he definitely has to pick another webpage at random. In case there are dangling nodes present, we again consider the probability to reach a website $x$ at time step $k.$  
+  
+  1. The random surfer can reach website $x$ at time $k$ from website $y$ at time $k-1$ by clicking on the link to $x$ with probability $d \cdot \frac{PR_{k-1}(y)}{L(y)}$ or by randomly selecting website $x$ with probability $\frac{1-d}{N} \cdot PR_{k-1}(y).$ Combining both we find that the probability of reaching $x$ from $y$ equals $PR_{k-1}(y) \cdot \left( d \cdot \frac{1}{L(y)} + (1-d) \cdot \frac{1}{N}\right).$
+  2. The random surfer can reach website $x$ at time $k$ from website $y$ at time $k-1$ which has no link to $x$ but has some links to other webpages by randomly selecting website $x$ with probability $PR_{k-1}(y)\cdot\frac{1-d}{N}.$  
+  3. The random surfer can reach website $x$ at time $k$ from website $y$ at time $k-1$ which has no link to $x$ and has no links to other webpages by randomly selecting website $x$ with probability $\frac{1}{N} \cdot PR_{k-1}(y).$ Note that the factor $1-d$ vanishes here as the random surfer has to select a random page with probability 1.  
+    
+Summing over all the different nodes, we get the probability of reaching website $x$ at time $k.$  
+  
+
+\begin{align*}
+PR_k(x) &= \sum_{y \ link \ to \ x} \left( PR_{k-1}(y) \cdot \left( \frac{d}{L(y)} + \frac{1-d}{N}\right) \right) + \sum_{y \ link \ to \ other, \ but \ not  \ to \ x} PR_{k-1}(y) \cdot \frac{1-d}{N}  + \sum_{y \ no \ link}  PR_{k-1}(y) \cdot \frac{1}{N} , \\
+& \\
+&= \sum_{y \ link \ to \ x} \left( PR_{k-1}(y) \cdot \left(\frac{d}{L(y)} + \frac{1-d}{N}\right) \right) + \sum_{y \ link \ to \ other, \ but \ not  \ to \ x}  PR_{k-1}(y) \cdot \frac{1-d}{N}  + \sum_{y \ no \ link}  PR_{k-1}(y) \cdot \left( \frac{1-d}{N} + \frac{d}{N} \right), \\
+& \\
+&= \frac{1-d}{N} + d \cdot \left( \sum_{y \ link \ to \ x} \frac{PR_{k-1}(y)}{L(y)} + \sum_{y \ no \ link} \frac{PR_{k-1}(y)}{N}  \right).
+\end{align*}  
+  
+  
+
+In order to satisfy this formula, we need to modify the definition of $m(x_i, x_j)$: 
+
+$$ m(x_i, x_j) =  \left\{ \begin{matrix} \frac{1}{L(x_j)}  & \mbox{if there exists a link from } x_j \ \mbox{to } x_i  \\ 0 & \mbox{if there exists a link from } x_j \ \mbox{to another } x_k \ \mbox{but not to } x_i
+\\ \frac{1}{N} & \mbox{if there exists no link from } x_j. 
+\end{matrix}\right.
+$$
+
+This new definition of $m$ is then used to define the matrix $M.$ 
+
+
+
+ 
+### Calculate PageRanks  
+  
+  
+
+#### Iterative
+
+At time step $k=0$ one initializes a probability distribution, must often equal to $PR(x)=\frac{1}{N},$ for each node $x.$ At each step $k,$ the information obtained in the previous step $k-1$ is used to calculate a new estimate for the PageRank vector as follows:
+
+\begin{align*} 
+R_k &= \frac{1-d}{N} \cdot \mathbf{1} + d \cdot M \cdot R_{k-1}.
+\end{align*}
+
+The iteration ends when the PageRank vector does not change much in between two consecutive steps. That is, the iteration ends when for a sufficiently small $\varepsilon$ and a large $K$ it holds that $|R_K - R_{K-1}| < \varepsilon.$  
+  
+</br>  
+  
+  
+#### Algebraic  
+  
+For time step $k \to \infty$ we could say that 
+
+\begin{align*} 
+R \approx \frac{1-d}{N} \cdot \mathbf{1} + d \cdot M \cdot R,
+\end{align*}
+
+such that 
+
+\begin{align*} 
+R \approx (\mathbb{I} - d \cdot M)^{-1} \cdot \frac{1-d}{N} \cdot \mathbf{1},
+\end{align*}
+where $\mathbb{I}$ is the $N \times N$ identity matrix. A sufficient condition for $\mathbb{I} - d \cdot M$ to be invertible is $M$ being a stochastic matrix. All entries of a stochastic matrix are nonnegative, real numbers, which is clearly satisfied for matrix $M.$ Moreover, the columns of a stochastic matrix sum to 1. For a column in matrix $M,$ associated with a dangling node $x_j$ this holds:
+$$\sum_{i=1}^{N} m(x_i, x_j) = \sum_{i=1}^{N} \frac{1}{N} = 1.$$ 
+
+For a column in matrix $M,$ associated with a normal node $x_j$ it also holds that 
+
+$$\sum_{i=1}^{N} m(x_i, x_j) = \sum_{x_j \ link \ to \ x_i} \frac{1}{L(x_j)} = \frac{L(x_j)}{L(x_j)}  = 1.$$
+
+ 
+## Some examples 
+### Example 1
+
+Consider a graph that consists of 4 different web pages. Page A contains a link to page B, page C and page D. Page B only links to page D. Page C points to A and D and page D points to pages A and C. We can show this graph in R by running the following code, based on the *igraph* package. 
+
+```{r igraph, include=FALSE}
+library(igraph)
+library(MASS)
+library(expm)    
+```
+
+```{r }
+WebGraph <- data.frame(from = c('A', 'A', 'A', 'B','C', 'C', 'D', 'D'),
+                       to = c('B','C','D','D','A','D','A', 'C'), 
+                       direction = c(2, 2, 2, 2, 1, 2, 1, 1))
+g <- graph_from_data_frame(WebGraph, directed = FALSE)
+pos <- cbind(c(1,2,1,2),c(2.5,2,0.5,1))
+plot.igraph(g, edge.label = NA, edge.color = 'black', edge.arrow.mode = WebGraph$direction, layout = pos, 
+            vertex.label = V(g)$name, vertex.color = 'turquoise', 
+            vertex.label.color = 'black', vertex.size = 25)
+```
+</br>
+
+We can also plot the same graph, but without two separate arrows between nodes that link to each other. This can be done by setting the *directed* argument in the *graph_from_data_frame* function equal to TRUE. 
+
+```{r }
+WebGraph <- data.frame(from = c('A', 'A', 'A', 'B','C', 'C', 'D', 'D'),
+                       to = c('B','C','D','D','A','D','A', 'C'))
+g <- graph_from_data_frame(WebGraph, directed = TRUE)
+pos <- cbind(c(1,2,1,2),c(2.5,2,0.5,1))
+plot.igraph(g, edge.label = NA, edge.color = 'black', layout = pos, 
+            vertex.label = V(g)$name, vertex.color = 'turquoise', 
+            vertex.label.color = 'black', vertex.size = 25)
+```
+
+In this example, the parameter values, as defined above, are equal to $N = 4$ and $d = 0.85.$ We first calculate the algebraic solution.
+
+
+```{r }
+M = matrix( c(0, 1/3, 1/3, 1/3, 0, 0, 0, 1, 1/2, 0, 0, 1/2, 1/2, 0, 1/2, 0), nrow=4, ncol=4)
+M
+Id = diag(4)
+OneCol= matrix(c(1, 1, 1, 1), nrow=4, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)/4*OneCol)
+R
+```
+First of all, we see that D has the highest rank and B the lowest. D is the most important node as all the other nodes have a hyperlink to node D. As there is only a link from node A to node B, B is the least important. Second, we see that node A has a higher rank than node C although they both have two hyperlinks from another node. Because node A has 3 hyperlinks, the contribution to the rank of C is less than the contribution of C to the rank of A.  
+  
+
+
+
+The PageRank vector can also be found by using the *page_rank* function from the *igraph* package, which uses the iterative procedure. 
+
+```{r }
+page_rank(g, vids = V(g), directed = TRUE, damping = 0.85,
+  personalized = NULL, weights = NULL)
+```
+
+We see that the PageRank vector indeed defines a probability distribution because the components sum up to 1 and they are all strictly positive.
+
+```{r }
+sum(page_rank(g, vids = V(g), directed = TRUE, damping = 0.85,
+  personalized = NULL, weights = NULL)$vector)
+```
+
+
+### Example 2
+
+We consider approximately the same problem as defined above but now Page B has no outgoing link, hence B is a dangling node. The graph then looks as follows.
+
+```{r }
+WebGraph <- data.frame(from = c('A', 'A', 'A','C', 'C', 'D', 'D'),
+                       to = c('B','C','D','A','D','A', 'C'))
+g <- graph_from_data_frame(WebGraph, directed = TRUE)
+pos <- cbind(c(1,2,1,2),c(2.5,2,0.5,1))
+plot.igraph(g, edge.label = NA, edge.color = 'black', layout = pos, 
+            vertex.label = V(g)$name, vertex.color = 'turquoise', 
+            vertex.label.color = 'black', vertex.size = 25)
+```
+
+If we would calculate the algebraic solution without modifying the matrix $M$ we get: 
+
+```{r }
+M = matrix( c(0, 1/3, 1/3, 1/3, 0, 0, 0, 0, 1/2, 0, 0, 1/2, 1/2, 0, 1/2, 0), nrow=4, ncol=4)
+M
+Id = diag(4)
+OneCol= matrix(c(1, 1, 1, 1), nrow=4, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)/4*OneCol)
+R
+sum(R)
+```
+ This does not define a probability distribution. We therefore modify $M$ as explained before.
+ 
+ ```{r }
+M = matrix( c(0, 1/3, 1/3, 1/3, 1/4, 1/4, 1/4, 1/4, 1/2, 0, 0, 1/2, 1/2, 0, 1/2, 0), nrow=4, ncol=4)
+M
+Id = diag(4)
+OneCol= matrix(c(1, 1, 1, 1), nrow=4, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)/4*OneCol)
+R
+sum(R)
+```
+
+We also check this with the built-in R function. 
+
+```{r }
+page_rank(g, vids = V(g), directed = TRUE, damping = 0.85,
+  personalized = NULL, weights = NULL)
+sum(page_rank(g, vids = V(g), directed = TRUE, damping = 0.85,
+  personalized = NULL, weights = NULL)$vector)
+```
+
+Node B still has the lowest rank as it only has one link from node A. Because node A has 3 outgoing links, the contribution to the rank of node C and D is less and that is the reason why A is ranked higher than C and D.
+
+## Personalized PageRank
+
+
+The simple PageRank algorithm gives each node an equal probability to be chosen by the random surfer. In this way the rank gives a general idea of the importance of each node in the network. On the other hand, the personalized PageRank algorithm makes it possible to bring out nodes in a network that are important from the perspective of a set of specific source nodes. An insurance company could for example be interested in fraudulent claims. Using a personalized PageRank algorithm, it is possible to personalize the ranks of insurance claims in a network towards these source nodes. The rank then indicates whether it is preferable to perform a fraud investigation on the claim or not, where high ranks indicate *risky* nodes.
+  
+  
+The personalized PageRank algorithm is derived from the simple PageRank algorithm. Instead of giving each node the same probability to be chosen, the random surfer can only jump to nodes that belong to the set of specific source nodes. The probabilities that the random surfer jumps to the different nodes in a network are put together in the *teleportation* vector $V.$ The personalized PageRank formula then looks as follows.
+
+\begin{align*} 
+
+R_k &= (1-d) \begin{bmatrix} 
+v_1 \\
+v_2 \\
+\vdots \\
+v_N 
+\end{bmatrix} + d \cdot  \begin{bmatrix} 
+m(x_1, x_1) & m(x_1, x_2) & \ldots & m(x_1, x_N)  \\
+m(x_2, x_1) & \ddots  & & \vdots \\
+\vdots & & \ddots & \\
+m(x_N, x_1) & \ldots & & m(x_N, x_N) 
+\end{bmatrix} \cdot R_{k-1} \\
+& \\
+&= (1-d) \cdot V + d \cdot M \cdot R_{k-1}.
+\end{align*}
+
+
+A similar reasoning on dangling nodes as before leads to a modified definition of matrix $M$ as follows
+
+$$ m(x_i, x_j) =  \left\{ \begin{matrix} \frac{1}{L(x_j)}  & \mbox{if there exists a link from } x_j \ \mbox{to } x_i  \\ 0 & \mbox{if there exists a link from } x_j \ \mbox{to another } x_k \ \mbox{but not to } x_i
+\\ v_i & \mbox{if there exists no link from } x_j. 
+\end{matrix}\right.
+$$
+If there is a network of $N$ claims with $F$ known fraudulent claims, the elements of the teleportation vector $V$ are 
+
+$$ v_i =  \left\{ \begin{matrix} \frac{1}{F}  & \mbox{if } x_i \ \mbox{is fraudulent } \\ 0 & \mbox{if } x_i \ \mbox{is not fraudulent, }
+\end{matrix}\right.
+$$
+
+for each $i \in \{ 1, \ldots, N\}.$
+
+
+
+### Example
+
+The following graph visualizes a network of claims and policyholders of an insurance company. If there is an edge between a policyholder and a claim, the policyholder was involved in the claim. 
+
+```{r }
+WebGraph <- data.frame(from = c('C1', 'PH1', 'C2', 'PH2', 'PH2', 'PH2', 'C4', 'C5'),
+                       to = c('PH1','C2','PH2','C3','C4','C5','PH3', 'PH3'))
+g <- graph_from_data_frame(WebGraph, directed = FALSE)
+pos <- cbind(c(1,1.5,2,3,2.5,3.5,4,3.5),c(1,2,2.5,1.9, 0.9,3, 2.7, 1 ))
+plot.igraph(g, edge.label = NA, edge.color = 'black', layout = pos, 
+            vertex.label = V(g)$name, vertex.color = 'turquoise', 
+            vertex.label.color = 'black', vertex.size = 25)
+```
+
+A general rank of each node in this graph can easily be calculated as before. The network in this example does not have a specific direction. To specify the matrix $M$ you then assume that each edge has two directions.
+
+```{r }
+M = matrix( c(0,1,0,0,0,0,0,0,      1/2,0,1/2,0,0,0,0,0,           0,1/2,0,1/2,0,0,0,0,         0,0,1/4,0,1/4,1/4,1/4,0,         0,0,0,1/2,0,0,0,1/2,           0,0,0,1/2,0,0,0,1/2,       0,0,0,1,0,0,0,0,         0,0,0,0,1/2,1/2,0,0     ), nrow=8, ncol=8)
+M
+Id = diag(8)
+OneCol= matrix(c(1, 1, 1, 1,1,1,1,1), nrow=8, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)/8*OneCol)
+R
+sum(R)
+```
+
+
+```{r }
+page_rank(g, vids = V(g), directed = FALSE, damping = 0.85,
+  personalized = NULL, weights = NULL)
+```
+
+The *personalized* argument of the *page_rank* function makes it possible to calculate a personalized rank. Suppose that we know that C5 is a fraudulent claim and the rest of the claims are not fraudulent. This extra information can be added such that the score of the nodes is personalized towards fraudulent claims. 
+
+
+ ```{r }
+M = matrix( c(0,1,0,0,0,0,0,0,      1/2,0,1/2,0,0,0,0,0,           0,1/2,0,1/2,0,0,0,0,         0,0,1/4,0,1/4,1/4,1/4,0,         0,0,0,1/2,0,0,0,1/2,           0,0,0,1/2,0,0,0,1/2,       0,0,0,1,0,0,0,0,         0,0,0,0,1/2,1/2,0,0     ), nrow=8, ncol=8)
+M
+Id = diag(8)
+OneCol= matrix(c(0,0,0,0,0,1,0,0), nrow=8, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)*OneCol)
+R
+sum(R)
+```
+
+
+
+```{r }
+page_rank(g, vids = V(g), directed = FALSE, damping = 0.85,
+  personalized = c(0,0,0,0,0,1,0,0), weights = NULL)
+```
+Based on these results we can conclude that it is more interesting to perform a fraud investigation on claim C4 or C2 than on claim C3 or C1.  
+  
+  
+</br>
+
+## A BiRank example
+
+The BiRank algorithm is a kind of personalized PageRank algorithm specifically designed for biparite networks. In fraud detection, a bipartite network typically consists of insurance claims (C) and involved policyholders (P). The following network consists of 5 claims and 4 policyholders.
+
+
+```{r }
+WebGraph <- data.frame(from = c('C3','C3', 'C4', 'P2','P3','P3', 'C1','C5', 'P1','P4'),
+                       to = c('P2', 'P3', 'P3','C1','C1', 'C5','P1','P4', 'C2', 'C2'  ))
+g <- graph_from_data_frame(WebGraph, directed = FALSE)
+pos <- cbind(c(1,1,2,2,2.5,3,4,4,5),c(3,1,4,2,3,0.1,2,0.1,1 ))
+plot.igraph(g, edge.label = NA, edge.color = 'black', layout = pos, 
+            vertex.label = V(g)$name, vertex.color = 'turquoise', 
+            vertex.label.color = 'black', vertex.size = 25)
+```
+
+The edges of the network can carry weights to indicate the strength of the connection. The weight matrix is called $W = (w_{ij})$, where $i \in \{1,...,n_C\}$ and $j \in \{1,...,n_P\}$. 
+
+As this is an unweighted graph, the matrix $W$ look as follows.
+
+
+ ```{r }
+W = matrix( c(1,1,0,0,0,    1,0,1,0,0,    1,0,1,1,1,    0,1,0,0,1), nrow=5, ncol=4)
+W
+```
+
+Following He et al. (2017) we define the degree of a node as the sum of the weights on the edges of the node. We can then define the diagonal matrices $D_c$ and $D_p$ for the claims and parties respectively. The matrix $S$ is called the symmetric normalized weight matrix, constructed as
+
+$$ S = D_c^{-1/2}WD_p^{-1/2}.$$
+ ```{r }
+Dc = matrix( c(3,0,0,0,0,   0,2,0,0,0,    0,0,2,0,0,    0,0,0,1,0,     0,0,0,0,2), nrow=5, ncol=5)
+Dp = matrix( c(2,0,0,0,   0,2,0,0,    0,0,4,0,    0,0,0,2), nrow=4, ncol=4)
+
+S = (solve(sqrt(Dc))%*%W)%*%solve(sqrt(Dp))
+S
+```
+
+Suppose that we know that C4 is a fraudulent claim. We can use this information to calculate the personalized PageRank vector of this network, as explained before. This can be done by using R or by implementing the analytical solution. 
+
+
+```{r }
+page_rank(g, vids = V(g), directed = FALSE, damping = 0.85,
+  personalized = c(0,1,0,0,0,0,0,0,0), weights = NULL)
+```
+
+ ```{r }
+M = matrix( c(0,0,1/2,1/2,0,0,0,0,0,       0,0,0,1,0,0,0,0,0,    1/2,0,0,0,1/2,0,0,0,0,   1/4,1/4,0,0,1/4,1/4,0,0,0,      0,0,1/3,1/3,0,0,1/3,0,0,   0,0,0,1/2,0,0,0,1/2,0,     0,0,0,0,1/2,0,0,0,1/2,   0,0,0,0,0,1/2,0,0,1/2,      0,0,0,0,0,0,1/2,1/2,0         ), nrow=9, ncol=9)
+M
+Id = diag(9)
+OneCol= matrix(c(0,1,0,0,0,0,0,0,0), nrow=9, ncol=1)
+d=0.85
+R = (ginv(Id-d*M))%*%((1-d)*OneCol)
+R
+sum(R)
+```
+
+According to He et al. (2017), the BiRank algorithm uses two different parameters $\alpha \in [0,1]$ and $\beta \in [0,1]$ to control the importance between the network and the prior information. The BiRank equations are
+\begin{align*}
+p &= \beta S^T c + (1-\beta)p^0 \\
+c &= \alpha S p + (1-\alpha)c^0,
+\end{align*} 
+
+where $p^0, c^0$ contain the prior information on the network. As policyholders are not fraudulent, only claims, we take $p^0=0$ and $c^0 = [0,0,0,1,0].$ Only the network structure for $p$ is important and therefore $\beta=1$. The BiRank vector can iteratively be found by the following implementation. 
+
+```{r }
+
+SS= t(S)
+
+c0 = c(0,0,0,1,0)
+a=0.85
+c_old=c(1/9,1/9,1/9,1/9,1/9)
+p_old=c(1/9,1/9,1/9,1/9)
+
+ctest=1
+ptest=1
+
+while ((ctest>10^(-10) | ptest>10^(-10))) {
+
+  c_new = a*S%*%p_old + (1-a)*c0
+  p_new = SS%*%c_old
+  ctest = norm(c_old-c_new)
+  ptest = norm(p_old-p_new)
+  c_old=c_new
+  p_old=p_new
+
+}
+
+c_new
+p_new
+
+combi = c(c_new, p_new)
+combi
+```
+
