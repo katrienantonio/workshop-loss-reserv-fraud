@@ -84,7 +84,7 @@ Topics include:
 - fitting well known claims reserving methods
 - when the simple methods fail: what else is there?
 
-Download lecture sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html) and [pdf].
+Download lecture sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf).
 
 ##### Half-day 3: Insurance fraud analytics
 

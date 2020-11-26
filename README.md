@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud* course in November 2020.
 
-📆 November 25, 26 and 27, 2020 <br> 🕓 From 9.30 am to 12.30 pm <br> 📍
+📆 November 25, 26 and 27, 2020 <br> 🕤 From 9.30 am to 12.30 pm <br> 📍
 online
 
 Course materials will be posted in the days before the workshop.
@@ -102,7 +102,8 @@ Topics include:
 
 Download lecture sheets in
 [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.html)
-and \[pdf\].
+and
+[pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud-2020/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf).
 
 ##### Half-day 3: Insurance fraud analytics
 
