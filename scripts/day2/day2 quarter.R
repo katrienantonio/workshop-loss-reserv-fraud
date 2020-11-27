@@ -26,10 +26,19 @@ date_to_quarter <- function(date) {
   return(quarter)
 }
 
+# Instead of yearly indices we now use quarterly indices
+# 5.0 <- first quarter 2015
+# 5.25 <- second quarter 2015
+# 5.5 <- third quarter 2015
+# 5.75 <- fourth quarter 2015
+# You can also multiply these periods by 4 to obtain whole numbers
+# --> Some data wrangling steps become easier with whole numbers
+# --> It is more difficult to interpret these whole numbers at a glance
 date_to_period <- function(date, base) {
   date_to_year(date) + date_to_quarter(date)/4 - base
 }
 
+# the first development period is 0, whereas with years we started counting at 1
 reserving_data <- reserving_data %>%
   mutate(accident_period = date_to_period(accident_date, 2010),
          reporting_period = date_to_period(reporting_date, 2010),
@@ -46,13 +55,14 @@ reserving_data <- reserving_data %>%
 head(reserving_data)
 
 # records:
-max_period <- 9.25
+max_period <- 9.25 # second quarter 2019
 accidents <- unique(reserving_data$accident_number)
 
 records <- expand.grid(accident_number = accidents,
                        development_period = seq(from = 0, to = max_period, by = .25))
 
 # claim data:
+# No change for quarterly data
 claim_data <- reserving_data %>% 
   group_by(accident_number) %>%
   slice(1) %>%
@@ -64,6 +74,7 @@ claim_data <- reserving_data %>%
 head(claim_data)
 
 # payment data:
+# development_year becomes development_period
 payment_data <- reserving_data %>%
   group_by(accident_number, development_period) %>%
   summarise(size = sum(payment_size),
@@ -93,7 +104,7 @@ reserve_actual
 
 ## The RBNS reserve is much larger than the IBNR reserve
 unobserved_data %>%
-  mutate(reported = (reporting_period <= 9.5)) %>%
+  mutate(reported = (reporting_period <= 9.25)) %>%
   group_by(reported) %>%
   summarise(reserve = sum(size))
 
@@ -104,6 +115,7 @@ unobserved_data %>%
 ## columns: aggregation variable for the columns
 ## variable: variable that will be aggregated in the cells of the triangle
 ## lower_na: fill the lower triangle with NA's
+## step: step size between periods 
 incremental_triangle <- function(data, 
                                  rows = 'accident_period',
                                  columns = 'development_period',
@@ -128,6 +140,7 @@ incremental_triangle <- function(data,
   return(triangle)
 }
 
+## All reserve calculations are the same
 cumulative_triangle <- function(data, 
                                 rows = 'accident_period',
                                 columns = 'development_period',
@@ -159,6 +172,6 @@ cl$f
 ultimate <- sum(cum2incr(cl$FullTriangle))
 already_paid <- sum(cum2incr(cl$Triangle), na.rm = TRUE)
 reserve_cl <-  ultimate - already_paid
-reserve_actual <- sum(unobserved_data_seasonal$size)
+reserve_actual <- sum(unobserved_data$size)
 
 data.frame(reserve_actual, reserve_cl, pct_error = (reserve_cl / reserve_actual - 1) * 100)
