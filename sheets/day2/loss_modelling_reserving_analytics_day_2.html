@@ -4,7 +4,7 @@
     <title>Loss modelling and reserving analytics in R</title>
     <meta charset="utf-8" />
     <meta name="author" content="Katrien Antonio &amp; Jonas Crevecoeur" />
-    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
     <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       CommonHTML: {
@@ -29,9 +29,12 @@ class: center, middle, inverse, title-slide
 <hr align='center' color='#116E8A' size=1px width=97%>
 </html>
 ### Katrien Antonio &amp; Jonas Crevecoeur
-### <a href="https://www.github.com/katrienantonio">Arcturus 2020 workshop</a> | November 25-27, 2020
+### <a href="https://www.github.com/katrienantonio/workshop-loss-reserv-fraud">IA|BE workshop</a> | June 3, 10 &amp; 17, 2021
 
 ---
+
+
+
 
 # Today's Outline
 
@@ -64,7 +67,7 @@ class: center, middle, inverse, title-slide
  
 * [Research outlook](#research_outlook)
 
-  - granualr reserving methods for predicting the IBNR reserve
+  - granular reserving methods for predicting the IBNR reserve
   - individual reserving methods for predicting the RBNS reserve
 ]
 
@@ -295,6 +298,7 @@ For .hi-pink[Q.4] we group the data by accident year and summarise the number of
 
 
 ```r
+library(tidyverse)
 reserving_data %&gt;%
   group_by(accident_year) %&gt;%
   summarise(num_claims = n())
@@ -303,7 +307,7 @@ reserving_data %&gt;%
 ```
 ## # A tibble: 10 x 2
 ##    accident_year num_claims
-##            &lt;dbl&gt;      &lt;int&gt;
+##  *         &lt;dbl&gt;      &lt;int&gt;
 ##  1             0      10275
 ##  2             1      10108
 ##  3             2      10633
@@ -605,7 +609,7 @@ unobserved_data %&gt;%
 ```
 ## # A tibble: 2 x 2
 ##   reported  reserve
-##   &lt;lgl&gt;       &lt;dbl&gt;
+## * &lt;lgl&gt;       &lt;dbl&gt;
 ## 1 FALSE     158665.
 ## 2 TRUE     2309581.
 ```
@@ -1908,11 +1912,6 @@ clA
 .tiny[
 
 ```
-## Warning in Mack.S.E(CL[["Models"]], FullTriangle, est.sigma = est.sigma, : Information: essentially no variation in development data for period(s):
-## '5-6', '6-7', '7-8', '8-9'
-```
-
-```
 ## MackChainLadder(Triangle = triangleA)
 ## 
 ##       Latest Dev.To.Date  Ultimate      IBNR Mack.S.E CV(IBNR)
@@ -2198,7 +2197,7 @@ Slides created with the R package [xaringan](https://github.com/yihui/xaringan).
 &lt;br&gt; &lt;br&gt; &lt;br&gt;
 Course material available via 
 &lt;br&gt;
-&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud-2020
+&lt;svg style="height:0.8em;top:.04em;position:relative;fill:#116E8A;" viewBox="0 0 496 512"&gt;&lt;path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/&gt;&lt;/svg&gt; https://github.com/katrienantonio/workshop-loss-reserv-fraud
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
