@@ -1,6 +1,6 @@
 ## Step 0: install and load packages
 
-packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "DMwR", "pROC", "ChainLadder", "lubridate")
+packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "pROC", "ChainLadder", "lubridate")
 new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 

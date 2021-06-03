@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud Analytics* course in June 2021.
 
-📆 June 3, 10 & 17 2021 <br> 🕚 From 3pm to 6pm <br> 📌 online via MS Teams
+📆 June 3, 10 & 17 2021 <br> 🕥 From 3pm to 6pm <br> 📌 online via MS Teams
 
 Course materials will be posted in the days before the workshop.
 
@@ -166,8 +166,8 @@ Here are the steps you should take (before the workshop):
   - with the ‘copy’ button (on the right) you can make your own version
     of the ‘day 1 on loss modelling’ project; in this copy you can work
     on the exercises, add comments etc.
-  - you should now be able to visit the ‘learn R by doing’ project and
-    see the ‘scripts’ and ‘data’ folders on the right. Open and run the
+  - you should now be able to visit the project and see the ‘scripts’
+    and ‘data’ folders on the right. Open and run the
     ‘installation-instructions.R’ script from the scripts folder, to
     see if everything works fine.
 
@@ -192,7 +192,7 @@ Please run the following script in your R session to install the
 required packages
 
 ``` r
-packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "DMwR", "pROC", "ChainLadder", "lubridate")
+packages <- c("tidyverse", "here", "gridExtra", "caret", "rsample", "recipes", "grid", "rstudioapi", "MASS", "actuar", "statmod", "ReIns", "pscl", "zoo", "igraph", "expm", "pROC", "ChainLadder", "lubridate")
 new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 
