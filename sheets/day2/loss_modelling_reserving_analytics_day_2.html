@@ -41,21 +41,16 @@ class: center, middle, inverse, title-slide
 .pull-left[
 * [Motivation and strategies](#motivation)
 
-* [Reserving data structures (part 1)](#horizontal_aggregation) 
-
-  - IBNR and RBNS reserve
-  - daily and yearly reserving data
-
-* [Reserving data structures (part 2)](#vertical_aggregation) 
+* [Reserving data structures](#vertical_aggregation) 
 
   - individual and aggregated reserving data
   - runoff triangles
   
-* [Claims reserving with triangle](#chainladder)
+* [Claims reserving with triangles](#chainladder)
 
-  - chainladder model
+  - chain ladder method
   - {ChainLadder} package
-  - chainLadder GLM implementation
+  - chain ladder implementation with GLMs
 ]
 
 .pull-right[
@@ -88,7 +83,7 @@ name: motivation
 # Motivation
 
 &lt;br&gt;
-Insurers observe the .hi-pink[detailed evolution] of .hi-pink[individual claims].
+Insurers observe the .hi-pink[detailed evolution] of .hi-pink[individual claims] over time:
 
 &lt;br&gt;
 
@@ -99,14 +94,14 @@ Insurers observe the .hi-pink[detailed evolution] of .hi-pink[individual claims]
 
 &lt;img src="image/lexis_claim.png" width="45%" style="display: block; margin: auto;" /&gt;
 
-Observed claims are .hi-pink[censored] due to .hi-pink[delays] (reporting, settlement) in the claim development process
+Observed claims are .hi-pink[censored] due to .hi-pink[delays] (reporting, settlement) in the claim development process.
 
-.KULbginline[Reserve]: future costs for claims that occurred in .hi-pink[past exposure periods] (claim B and C)
+.KULbginline[Reserve]: future costs for claims that occurred in .hi-pink[past exposure periods] (claims B and C)
 
-* RBNS reserve: Reserve for Reported, But Not yet Settled claims (claim B)
-* IBNR reserve: Reserve for Incurred, But Not yet Reported claims (claim C) 
+* RBNS: Reported, But Not yet Settled claims (claim B)
+* IBNR: Incurred, But Not yet Reported claims (claim C). 
 
-.KULbginline[Pricing]: all costs for claims that will occur in .hi-pink[future] insured .hi-pink[exposure periods] (claim D)
+.KULbginline[Pricing]: all costs for claims that will occur in .hi-pink[future] insured .hi-pink[exposure periods] (claim D).
 
 ---
 # Three strategies for non-life reserving
@@ -120,30 +115,28 @@ Observed claims are .hi-pink[censored] due to .hi-pink[delays] (reporting, settl
 
 ### Aggregate reserving
 
-First aggregate the past claim history into a .hi-pink[small number of summary statistics], &lt;br&gt;
-then predict the total reserve based on these summary statistics.
+First, we aggregate the past claim history into a .hi-pink[small number of summary statistics], &lt;br&gt;
+then we predict the total reserve based on these summary statistics.
 
 ### Granular reserving
-First aggregate the past claim history into a .hi-pink[large number of summary statistics], &lt;br&gt;
-then predict the total reserve based on these summary statistics.
+First, we aggregate the past claim history into a .hi-pink[large number of summary statistics], &lt;br&gt;
+then we predict the total reserve based on these summary statistics.
 
 ### Individual reserving
-First predict the future costs for .hi-pink[indivudal claims], &lt;br&gt;
-then aggregate these individual predictions to predict the total reserve.
+First, we predict the future costs for .hi-pink[individual claims], &lt;br&gt;
+then we aggregate these individual predictions to predict the total reserve.
 
 ---
 # Data set used in this session
 
-&lt;hr style="height:5px; visibility:hidden;" /&gt;
+We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims between January 1, 2010 and December 31, 2019. Data is available in a daily and yearly format.
 
-We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims between January 1, 2010 and December 31, 2019.
+.KULbginline[Daily] data:
 
-* Information is available at daily level
-* Records correspond to payments made for these claims
+* with claim events recorded at daily precision
+* with records correspond to the reporting of a claim or a payment being made.
 
-&lt;hr style="height:5px; visibility:hidden;" /&gt;
-
-The data is stored in a .RData file in the `data` directory in the course material:
+The data is stored in a .rds file in the `data` directory in the course material:
 
 
 ```r
@@ -151,59 +144,54 @@ The data is stored in a .RData file in the `data` directory in the course materi
 dir &lt;- dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(dir)
 
-load("data/reserving_data.RData")
+reserving_daily &lt;- readRDS("data/reserving_data_daily.rds")
 ```
 
 .tiny[
 
 ```
 ##   accident_number accident_date reporting_date settlement_date reporting_delay settlement_delay payment_date payment_size
-## 1               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-01       0.0000
-## 2               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-07     446.2251
-## 3               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-18     490.1792
-## 4               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-10-01     587.7409
-## 5               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-10-19    1726.0902
-## 6               2    2013-09-20     2013-09-26      2014-04-06               6              198   2013-09-26       0.0000
+## 1               1    2012-12-02     2012-12-07      2013-03-10               5               98   2012-12-07       0.0000
+## 2               1    2012-12-02     2012-12-07      2013-03-10               5               98   2012-12-13     446.2251
+## 3               1    2012-12-02     2012-12-07      2013-03-10               5               98   2012-12-24     490.1792
+## 4               1    2012-12-02     2012-12-07      2013-03-10               5               98   2013-01-06     587.7409
+## 5               1    2012-12-02     2012-12-07      2013-03-10               5               98   2013-01-24    1726.0902
+## 6               2    2014-02-04     2014-02-10      2014-08-21               6              198   2014-02-10       0.0000
 ```
 ]
 
 ---
-# Data set used in this session (continued)
+# Data set used in this session
 
-Discretize daily dates to yearly indices:
+We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims between January 1, 2010 and December 31, 2019. Data is available in a daily and yearly format.
+
+.KULbginline[Yearly] data:
+
+* aggregated into one record per claim per development year.
+
+The data is stored in a .rds file in the `data` directory in the course material:
 
 
 ```r
-date_to_year &lt;- function(date, base_year) {
-  year &lt;- as.numeric(format(date, '%Y')) - base_year
-}
+# install.packages("rstudioapi")
+dir &lt;- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(dir)
 
-reserving_data &lt;- reserving_data %&gt;%
-  mutate(accident_year = date_to_year(accident_date, 2010),
-         reporting_year = date_to_year(reporting_date, 2010),
-         payment_year = date_to_year(payment_date, 2010),
-         development_year = payment_year - accident_year + 1,
-         settlement_year = date_to_year(settlement_date, 2010))
+reserving_yearly &lt;- readRDS("data/reserving_data_yearly.rds")
 ```
-
 
 .tiny[
 
 ```
-##   accident_number accident_date reporting_date settlement_date reporting_delay settlement_delay payment_date payment_size accident_year reporting_year payment_year
-## 1               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-01       0.0000             2              2            2
-## 2               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-07     446.2251             2              2            2
-## 3               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-09-18     490.1792             2              2            2
-## 4               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-10-01     587.7409             2              2            2
-## 5               1    2012-08-27     2012-09-01      2012-12-03               5               98   2012-10-19    1726.0902             2              2            2
-## 6               2    2013-09-20     2013-09-26      2014-04-06               6              198   2013-09-26       0.0000             3              3            3
-##   development_year settlement_year
-## 1                1               2
-## 2                1               2
-## 3                1               2
-## 4                1               2
-## 5                1               2
-## 6                1               4
+## # A tibble: 6 x 10
+##   accident_number accident_year reporting_year settlement_year development_year calendar_year  size payment close is_closed
+##             &lt;int&gt;         &lt;dbl&gt;          &lt;dbl&gt;           &lt;dbl&gt;            &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;
+## 1               1             2              2               3                1             2  936.       1     0         0
+## 2               1             2              2               3                2             3 2314.       1     1         1
+## 3               2             4              4               4                1             4 3537.       1     1         1
+## 4               3             6              6               6                1             6 1975.       1     1         1
+## 5               4             9             10              10                1             9    0        0     0         0
+## 6               4             9             10              10                2            10 3107.       1     1         1
 ```
 ]
 
@@ -220,7 +208,7 @@ class: clear
 .right-column[
 
 &lt;br&gt;
-In this warm up exercise you load the `reserving data` data set and get some feel for the data.
+In this warm up exercise you load the `reserving_daily` or `reserving_yearly` data and get some feel for the data. Choose for each task the format that is most convenient (daily or yearly).
 
 1. Visualize the reporting and settlement delay of claims with a density plot. 
 
@@ -237,7 +225,7 @@ class: clear
 For .hi-pink[Q.1] we plot the density of reporting and settlement delay:
 
 ```r
-ggplot(data = reserving_data) + 
+ggplot(data = reserving_daily) + 
   theme_bw() +
   geom_density(aes(reporting_delay, fill = 'reporting delay'), 
                alpha = .5) +
@@ -255,11 +243,11 @@ For .hi-pink[Q.2] the last payment was in 2024, i.e. the simulated data is not y
 
 
 ```r
-max(reserving_data$payment_date)
+max(reserving_daily$payment_date)
 ```
 
 ```
-## [1] "2024-05-05"
+## [1] "2025-05-03"
 ```
 ]
 
@@ -267,30 +255,22 @@ max(reserving_data$payment_date)
 class: clear
 
 .pull-left[
-For .hi-pink[Q.3] the data set records one row per payment.
+For .hi-pink[Q.3] we average the number of payments per claim. Count only records with `payment_size &gt; 0` to exclude the reporting event.
 
 
 ```r
-num_claim &lt;- length(unique(reserving_data$accident_number))
-num_payment &lt;- nrow(reserving_data)
-
-num_payment/num_claim
+reserving_daily %&gt;%
+  group_by(accident_number) %&gt;%
+  summarise(payments = sum(payment_size &gt; 0)) %&gt;%
+  ungroup() %&gt;%
+  summarise(average = mean(payments))
 ```
 
 ```
-## [1] 3.425433
-```
-
-At reporting, the data set registers a zero payment for each claim. The average number of non-zero payments per claim is
-
-
-```r
-num_payment &lt;- sum(reserving_data$payment_size &gt; 0)
-num_payment/num_claim 
-```
-
-```
-## [1] 2.376633
+## # A tibble: 1 x 1
+##   average
+##     &lt;dbl&gt;
+## 1    2.38
 ```
 ]
 .pull-right[
@@ -299,309 +279,85 @@ For .hi-pink[Q.4] we group the data by accident year and summarise the number of
 
 ```r
 library(tidyverse)
-reserving_data %&gt;%
-  group_by(accident_year) %&gt;%
-  summarise(num_claims = n())
+reserving_yearly %&gt;%
+        filter(development_year == 1) %&gt;%
+        group_by(accident_year) %&gt;%
+        summarise(num_claims = n())
 ```
 
 ```
-## # A tibble: 10 x 2
+## # A tibble: 11 x 2
 ##    accident_year num_claims
 ##  *         &lt;dbl&gt;      &lt;int&gt;
-##  1             0      10275
-##  2             1      10108
-##  3             2      10633
-##  4             3      10295
-##  5             4      10213
-##  6             5      10130
-##  7             6      10222
-##  8             7      10069
-##  9             8      10261
-## 10             9      10557
+##  1             0       2743
+##  2             1       2725
+##  3             2       2810
+##  4             3       2756
+##  5             4       2705
+##  6             5       2706
+##  7             6       2703
+##  8             7       2708
+##  9             8       2640
+## 10             9       2751
+## 11            10       2391
 ```
 
-The portfolio is stable over time.
+We apply the filter `development_year == 1` to count each claim only once. Claim frequency is slightly lower in accident year 10.
 
 ]
-
----
-class: inverse, center, middle
-name: horizontal_aggregation
-
-# Reserving data structures: daily and yearly data
-
-&lt;html&gt;&lt;div style='float:left'&gt;&lt;/div&gt;&lt;hr color='#FAFAFA' size=1px width=796px&gt;&lt;/html&gt;
-
-
----
-# From daily to yearly data
-&lt;br&gt;
-Reserves are often calculated based on yearly, .hi-pink[aggregated data]. &lt;br&gt;Data aggregation removes the daily noise from the data.
-
-In a first step, we construct a data set that consists of .hi-pink[one record per claim and per development year]. 
-&lt;br&gt;We construct this data set by merging three partial data sets:
-
-* `records`: .hi-pink[empty data set] with one record per claim per development year
-
-* `claim_data`: data set with one record per claim containing the .hi-pink[static claim covariates] (e.g. accident year)
-
-* `payment_data`: data set containing the total .hi-pink[amount paid per claim and per development year]. &lt;br&gt;This data set contains only records for development years with at least one payment.
-
----
-# From daily to yearly data (continued)
-
-.pull-left[
-For `records`, `expand.grid` creates a data.frame with all combinations of `accident_number` and `development year`.
-
-
-```r
-max_dev_year &lt;- 10
-accidents &lt;- unique(reserving_data$accident_number)
-
-records &lt;- expand.grid(accident_number = accidents,
-                       development_year = 1:max_dev_year)
-```
-]
-
-.pull-right[
-`expand.grid` creates a data.frame with all possible combinations of the input vectors.
-
-```r
-expand.grid(A = c(1, 5, 7), B = c(4, 6))
-```
-
-```
-##   A B
-## 1 1 4
-## 2 5 4
-## 3 7 4
-## 4 1 6
-## 5 5 6
-## 6 7 6
-```
-]
-
-
-```r
-head(records)
-```
-
-```
-##   accident_number development_year
-## 1               1                1
-## 2               2                1
-## 3               3                1
-## 4               4                1
-## 5               5                1
-## 6               6                1
-```
-
----
-# From daily to yearly data (continued)
-
-.pull-left[
-For `claim_data`, we select for each `accident_number` the first row in `reserving_data`.
-
-
-
-```r
-claim_data &lt;- reserving_data %&gt;% 
-  group_by(accident_number) %&gt;%
-  slice(1) %&gt;%
-  ungroup() %&gt;%
-  select(accident_number, accident_year, 
-         accident_date, reporting_year, 
-         settlement_year)
-```
-
-
-```r
-head(claim_data)
-```
-
-```
-## # A tibble: 6 x 5
-##   accident_number accident_year accident_date reporting_year settlement_year
-##             &lt;int&gt;         &lt;dbl&gt; &lt;date&gt;                 &lt;dbl&gt;           &lt;dbl&gt;
-## 1               1             2 2012-08-27                 2               2
-## 2               2             3 2013-09-20                 3               4
-## 3               3             5 2015-09-24                 5               5
-## 4               4             9 2019-01-30                 9               9
-## 5               5             2 2012-01-07                 2               2
-## 6               6             8 2018-12-25                 8               9
-```
-]
-.pull-right[
-`slice(k)` selects the `\(k\)`-th record of a data set
-
-```r
-df &lt;- data.frame(x = c(1, 2, 3, 4, 5, 6), y = c(1, 1, 1, 2, 2, 2))
-df %&gt;% slice(4)
-```
-
-```
-##   x y
-## 1 4 2
-```
-In combination with `group_by` we can select the `\(k\)`-th record within each group
-
-```r
-df %&gt;% group_by(y) %&gt;% slice(1)
-```
-
-```
-## # A tibble: 2 x 2
-## # Groups:   y [2]
-##       x     y
-##   &lt;dbl&gt; &lt;dbl&gt;
-## 1     1     1
-## 2     4     2
-```
-]
-
----
-# From daily to yearly data (continued)
-
-.pull-left[
-For `payment_data`, we aggregate payments per claim by `development_year`.
-
-
-```r
-payment_data &lt;- reserving_data %&gt;%
-  group_by(accident_number, development_year) %&gt;%
-  summarise(size = sum(payment_size),
-            payment = size &gt; 0)
-```
-]
-
-.pull-right[
-`summarise` returns one record for each combination of `accident_number` and `development_year` in `reserving_data`. &lt;br&gt;&lt;br&gt;
-The data set contains no records development years in which no payment was made for a claim!
-]
-
-
-```r
-head(payment_data)
-```
-
-```
-## # A tibble: 6 x 4
-## # Groups:   accident_number [5]
-##   accident_number development_year  size payment
-##             &lt;int&gt;            &lt;dbl&gt; &lt;dbl&gt; &lt;lgl&gt;  
-## 1               1                1 3250. TRUE   
-## 2               2                1 2347. TRUE   
-## 3               2                2 1189. TRUE   
-## 4               3                1 1975. TRUE   
-## 5               4                1 3107. TRUE   
-## 6               5                1 2376. TRUE
-```
-
----
-# From daily to yearly data (continued)
-
-.pull-left[
-Merge `records`, `claim_data` and `payment_data` into a new data set `individual_data`.
-
-```r
-individual_data &lt;- records %&gt;%
-  left_join(claim_data,
-            by = 'accident_number') %&gt;%
-  left_join(payment_data, 
-            by = c('accident_number', 'development_year')) %&gt;%
-  mutate(size = replace_na(size, 0),
-         payment = replace_na(payment, FALSE))
-```
-
-
-```r
-dim(individual_data)
-```
-
-```
-## [1] 300000      8
-```
-
-]
-
-.pull-right[
-`left_join` combines records in the first (left) with records from the second (right) data set with matching values in the `by` column. &lt;br&gt;If no match is found in the right data set an `NA` value is imputed.
-
-
-```r
-left &lt;- data.frame(x = c(1, 2, 3), left = 1)
-right &lt;- data.frame(x = c(1, 2, 4), right = 1)
-left_join(left, right, by = 'x')
-```
-
-```
-##   x left right
-## 1 1    1     1
-## 2 2    1     1
-## 3 3    1    NA
-```
-]
-
-
-```r
-head(individual_data, 3)
-```
-
-```
-##   accident_number development_year accident_year accident_date reporting_year settlement_year     size payment
-## 1               1                1             2    2012-08-27              2               2 3250.235    TRUE
-## 2               2                1             3    2013-09-20              3               4 2347.445    TRUE
-## 3               3                1             5    2015-09-24              5               5 1975.269    TRUE
-```
 
 ---
 # Censoring the data
 
 &lt;br&gt;
-The simulated data is not censored, i.e. we observe the full development of all claims that occur before 2019.&lt;br&gt;
-In practice the available data set is censored and we only observe: 
+The simulated data is not censored, i.e. we observe the full development of all claims that occur before the end of 2019.&lt;br&gt;
+In practice the available data set will be censored and we will only observe: 
 
 * reported claims
-* development information for past calendar years
+* development information in past calendar years.
 
-We censor the data assuming that we observe data until the end of 2019
+We censor the data assuming that we observe data until the end of 2020:
 
 
 ```r
-observed_data &lt;- individual_data %&gt;%
-  mutate(calendar_year = accident_year + development_year - 1) %&gt;%
-  filter(calendar_year &gt;= reporting_year,
-         calendar_year &lt;= 9)
+observed_daily &lt;- reserving_daily %&gt;%
+  filter(payment_date &lt;= as.Date('2020-12-31'))
 
-unobserved_data &lt;- individual_data %&gt;%
-  mutate(calendar_year = accident_year + development_year - 1) %&gt;%
-  filter(calendar_year &gt; 9)
+unobserved_daily &lt;- reserving_daily %&gt;%
+  filter(payment_date &gt; as.Date('2020-12-31'))
+
+observed_yearly &lt;- reserving_yearly %&gt;%
+  filter(calendar_year &lt;= 10,
+         reporting_year &lt;= 10)
+
+unobserved_yearly &lt;- reserving_yearly %&gt;% 
+  filter(calendar_year &gt; 10 | reporting_year &gt; 10)
 ```
 
 ---
 # IBNR and RBNS reserves
 
-Reserving models predict the total payments in the unobserved data
+Reserving models predict the total payments in the unobserved part of the data:
 
 
 ```r
-reserve_actual &lt;- sum(unobserved_data$size)
+reserve_actual &lt;- sum(unobserved_yearly$size)
 reserve_actual
 ```
 
 ```
-## [1] 2468246
+## [1] 2149312
 ```
 
-Some reserving methods split this reserve in an
+Some reserving methods split this reserve into
 
-* IBNR reserve: a reserve for Incurred, But Not (yet) Reported claims
-* RBNS reserve: a reserve for Reported, But Not (yet) Settled claims
+* IBNR: a reserve for Incurred, But Not (yet) Reported claims
+* RBNS: a reserve for Reported, But Not (yet) Settled claims.
 
 
 ```r
-unobserved_data %&gt;%
-  mutate(reported = (reporting_year &lt;= 9)) %&gt;%
+unobserved_yearly %&gt;%
+  mutate(reported = (reporting_year &lt;= 10)) %&gt;%
   group_by(reported) %&gt;%
   summarise(reserve = sum(size))
 ```
@@ -610,8 +366,8 @@ unobserved_data %&gt;%
 ## # A tibble: 2 x 2
 ##   reported  reserve
 ## * &lt;lgl&gt;       &lt;dbl&gt;
-## 1 FALSE     158665.
-## 2 TRUE     2309581.
+## 1 FALSE     134124.
+## 2 TRUE     2015188.
 ```
 
 ---
@@ -628,11 +384,11 @@ name: vertical_aggregation
 
 ### Individual triangle
 
-The data set `individual_data` describes the development of .hi-pink[individual claims discretised by calendar year]. &lt;br&gt; 
+The data set `reserving_yearly` describes the development of .hi-pink[individual claims discretised by calendar year]. &lt;br&gt; 
 
 We can represent the claim characteristics in this data set (settlement, payment, payment size) with .hi-pink[two-dimensional tables] in which the rows represent .hi-pink[individual claims] and columns represent .hi-pink[development years]. &lt;br&gt;
 
-For payment size, this table consists of cells `\(U^\texttt{size}_{k, j}\)` with `\(U^\texttt{size}_{k, j}\)` denoting the total amount paid for claim `\(k\)` in development year `\(j\)`. &lt;br&gt;
+For payment size, this table consists of cells `\(U^\texttt{size}_{k, j}\)`, denoting the total amount paid for claim `\(k\)` in development year `\(j\)`. &lt;br&gt;
 
 ### Runoff triangle
 
@@ -641,14 +397,15 @@ Many reserving models go one step further and remove individual claim characteri
 `$$X^{\texttt{size}}_{i, j} = \sum_{\texttt{occ.year(k)} = i} U^\texttt{size}_{k, j}.$$`
 As a result of the Law of Large Numbers (LLN), aggregating data from many claims into runoff triangles .hi-pink[reduces the variance] when all claims are independent realizations from the same distribution.
 
+
 ---
 # From individual to aggregated data (continued)
 
 .pull-left[
-We construct a runoff triangle by aggregating individual claims by `accident_year`.
+We construct a runoff triangle by aggregating the individual claims by `accident_year`.
 
 ```r
-observed_data %&gt;%
+observed_yearly %&gt;%
   group_by(accident_year, development_year) %&gt;%
   summarise(value = sum(size)) %&gt;%
   pivot_wider(values_from = value, 
@@ -656,50 +413,33 @@ observed_data %&gt;%
               names_prefix = 'DY.') 
 ```
 
-.tiny[
+`pivot_wider` creates for each unique value of `names_from` a new column
 
-```
-## # A tibble: 10 x 11
-## # Groups:   accident_year [10]
-##    accident_year     DY.1     DY.2    DY.3   DY.4   DY.5  DY.6  DY.7  DY.8  DY.9 DY.10
-##            &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1             0 4532915. 1739699. 121876. 25952.  9305. 6703. 9479. 6217. 3468.     0
-##  2             1 4414954. 1673577. 107415. 19472.     0     0     0     0     0     NA
-##  3             2 4786833. 1785616. 149240. 59348. 14858. 4404.    0     0    NA     NA
-##  4             3 4653451. 1614053. 127900. 36214.  9301.    0     0    NA    NA     NA
-##  5             4 4321019. 1909085. 159247. 49184. 11728.    0    NA    NA    NA     NA
-##  6             5 4417129. 1722151. 103907. 65592. 15129.   NA    NA    NA    NA     NA
-##  7             6 4538329. 1718509. 146138. 19248.    NA    NA    NA    NA    NA     NA
-##  8             7 4578285. 1618201.  77054.    NA     NA    NA    NA    NA    NA     NA
-##  9             8 4503558. 1756243.     NA     NA     NA    NA    NA    NA    NA     NA
-## 10             9 4575529.      NA      NA     NA     NA    NA    NA    NA    NA     NA
-```
-]
+
 ]
 
 .pull-right[
-`pivot_wider` widens the data set by increasing the number of columns, while decreasing the number of rows.&lt;br&gt; 
-`names_from`: The resulting data set contains a separate column for each unique outcome of this variable. &lt;br&gt;
-`values_from`: Values from this variable are stored in the newly created columns. 
 
-
-```r
-df &lt;- data.frame(x = c(1, 1, 1, 2, 2, 2, 3, 3, 3),
-                 y = c(1, 2, 3, 1, 2, 3, 1, 2, 3), 
-                 value = c(1, 2, 3, 4, 5, 6, 7, 8, 9))
-pivot_wider(df, 
-            names_from = y,
-            values_from = value)
-```
+.tiny[
 
 ```
-## # A tibble: 3 x 4
-##       x   `1`   `2`   `3`
-##   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1     1     1     2     3
-## 2     2     4     5     6
-## 3     3     7     8     9
+## # A tibble: 11 x 10
+## # Groups:   accident_year [11]
+##    accident_year     DY.1     DY.2    DY.3   DY.4   DY.5  DY.6  DY.7  DY.8  DY.9
+##            &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1             0 4075901. 1610076. 112557. 24668. 10680. 8840. 9479. 6217. 3468.
+##  2             1 4037070. 1461939.  62622. 18518.     0    NA    NA    NA    NA 
+##  3             2 4322579. 1774121. 105850. 41429. 24099. 7031.    0    NA    NA 
+##  4             3 4162489. 1616297. 104487. 15982.    NA    NA    NA    NA    NA 
+##  5             4 3903230. 1605598. 160906. 24194. 11622.   NA    NA    NA    NA 
+##  6             5 4052230. 1623940. 131721. 26686. 14096. 6262.   NA    NA    NA 
+##  7             6 4087125. 1593968.  96484. 40310.  4930.   NA    NA    NA    NA 
+##  8             7 4059058. 1771141. 170375. 37317.    NA    NA    NA    NA    NA 
+##  9             8 4033678. 1309634. 140624.    NA     NA    NA    NA    NA    NA 
+## 10             9 4141278. 1615333.     NA     NA     NA    NA    NA    NA    NA 
+## 11            10 3443223.      NA      NA     NA     NA    NA    NA    NA    NA
 ```
+]
 
 ]
 
@@ -712,8 +452,9 @@ A more sophisticated function for computing incremental runoff triangles is avai
 
 
 
+
 ```r
-incremental_triangle(observed_data,
+incremental_triangle(observed_yearly,
                      variable = 'payment',
                      lower_na = TRUE)
 ```
@@ -721,26 +462,27 @@ incremental_triangle(observed_data,
 .tiny[
 
 ```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 2264  550   20    5    2    1    1    1    1     0
-##  [2,] 2269  533   27    5    0    0    0    0    0    NA
-##  [3,] 2307  557   26    8    3    1    0    0   NA    NA
-##  [4,] 2289  537   23    8    1    0    0   NA   NA    NA
-##  [5,] 2239  581   33    8    1    0   NA   NA   NA    NA
-##  [6,] 2211  532   24    6    3   NA   NA   NA   NA    NA
-##  [7,] 2197  537   30    5   NA   NA   NA   NA   NA    NA
-##  [8,] 2250  510   18   NA   NA   NA   NA   NA   NA    NA
-##  [9,] 2271  544   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,] 2319   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,] 2054  523   17    6    2    1    1    1    1     0     0
+##  [2,] 2074  482   16    4    0    0    0    0    0     0    NA
+##  [3,] 2106  549   25    5    4    2    0    0    0    NA    NA
+##  [4,] 2033  532   24    5    0    0    0    0   NA    NA    NA
+##  [5,] 2008  473   32    7    2    0    0   NA   NA    NA    NA
+##  [6,] 2035  498   26    4    2    2   NA   NA   NA    NA    NA
+##  [7,] 2028  487   17    5    1   NA   NA   NA   NA    NA    NA
+##  [8,] 2030  528   34    9   NA   NA   NA   NA   NA    NA    NA
+##  [9,] 2005  444   24   NA   NA   NA   NA   NA   NA    NA    NA
+## [10,] 2100  507   NA   NA   NA   NA   NA   NA   NA    NA    NA
+## [11,] 1784   NA   NA   NA   NA   NA   NA   NA   NA    NA    NA
 ```
 ]
 ]
 
 .pull-right[
-Using this function you can easily inspect the reserving data using multiple triangles.
+Using this function you can easily inspect the reserving data with multiple triangles.
 
 ```r
-incremental_triangle(observed_data,
+incremental_triangle(observed_yearly,
                      variable = 'size',
                      lower_na = TRUE)
 ```
@@ -748,17 +490,18 @@ incremental_triangle(observed_data,
 .tiny[
 
 ```
-##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]    [,7]     [,8]     [,9] [,10]
-##  [1,] 4532915 1739699 121876.31 25951.66  9304.915 6703.063 9478.77 6217.266 3468.364     0
-##  [2,] 4414954 1673577 107415.07 19472.27     0.000    0.000    0.00    0.000    0.000    NA
-##  [3,] 4786833 1785616 149239.81 59348.18 14857.743 4404.145    0.00    0.000       NA    NA
-##  [4,] 4653451 1614053 127900.21 36213.57  9301.109    0.000    0.00       NA       NA    NA
-##  [5,] 4321019 1909085 159246.74 49184.25 11727.691    0.000      NA       NA       NA    NA
-##  [6,] 4417129 1722151 103906.89 65592.12 15129.218       NA      NA       NA       NA    NA
-##  [7,] 4538329 1718509 146138.00 19248.11        NA       NA      NA       NA       NA    NA
-##  [8,] 4578285 1618201  77053.93       NA        NA       NA      NA       NA       NA    NA
-##  [9,] 4503558 1756243        NA       NA        NA       NA      NA       NA       NA    NA
-## [10,] 4575529      NA        NA       NA        NA       NA      NA       NA       NA    NA
+##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]    [,7]     [,8]     [,9] [,10] [,11]
+##  [1,] 4075901 1610076 112556.58 24668.43 10679.546 8840.487 9478.77 6217.266 3468.364     0     0
+##  [2,] 4037070 1461939  62622.23 18517.80     0.000    0.000    0.00    0.000    0.000     0    NA
+##  [3,] 4322579 1774121 105850.01 41429.20 24098.625 7030.788    0.00    0.000    0.000    NA    NA
+##  [4,] 4162489 1616297 104486.62 15982.39     0.000    0.000    0.00    0.000       NA    NA    NA
+##  [5,] 3903230 1605598 160905.57 24194.32 11622.131    0.000    0.00       NA       NA    NA    NA
+##  [6,] 4052230 1623940 131721.42 26685.98 14095.805 6261.739      NA       NA       NA    NA    NA
+##  [7,] 4087125 1593968  96483.79 40310.11  4930.009       NA      NA       NA       NA    NA    NA
+##  [8,] 4059058 1771141 170374.72 37317.06        NA       NA      NA       NA       NA    NA    NA
+##  [9,] 4033678 1309634 140624.40       NA        NA       NA      NA       NA       NA    NA    NA
+## [10,] 4141278 1615333        NA       NA        NA       NA      NA       NA       NA    NA    NA
+## [11,] 3443223      NA        NA       NA        NA       NA      NA       NA       NA    NA    NA
 ```
 ]
 ]
@@ -775,7 +518,7 @@ When using a new reserving method, check whether the incremental or cumulative r
 .pull-left[
 
 ```r
-incremental_triangle(observed_data,
+incremental_triangle(observed_yearly,
                      variable = 'size',
                      lower_na = TRUE)
 ```
@@ -783,17 +526,18 @@ incremental_triangle(observed_data,
 .tiny[
 
 ```
-##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]    [,7]     [,8]     [,9] [,10]
-##  [1,] 4532915 1739699 121876.31 25951.66  9304.915 6703.063 9478.77 6217.266 3468.364     0
-##  [2,] 4414954 1673577 107415.07 19472.27     0.000    0.000    0.00    0.000    0.000    NA
-##  [3,] 4786833 1785616 149239.81 59348.18 14857.743 4404.145    0.00    0.000       NA    NA
-##  [4,] 4653451 1614053 127900.21 36213.57  9301.109    0.000    0.00       NA       NA    NA
-##  [5,] 4321019 1909085 159246.74 49184.25 11727.691    0.000      NA       NA       NA    NA
-##  [6,] 4417129 1722151 103906.89 65592.12 15129.218       NA      NA       NA       NA    NA
-##  [7,] 4538329 1718509 146138.00 19248.11        NA       NA      NA       NA       NA    NA
-##  [8,] 4578285 1618201  77053.93       NA        NA       NA      NA       NA       NA    NA
-##  [9,] 4503558 1756243        NA       NA        NA       NA      NA       NA       NA    NA
-## [10,] 4575529      NA        NA       NA        NA       NA      NA       NA       NA    NA
+##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]    [,7]     [,8]     [,9] [,10] [,11]
+##  [1,] 4075901 1610076 112556.58 24668.43 10679.546 8840.487 9478.77 6217.266 3468.364     0     0
+##  [2,] 4037070 1461939  62622.23 18517.80     0.000    0.000    0.00    0.000    0.000     0    NA
+##  [3,] 4322579 1774121 105850.01 41429.20 24098.625 7030.788    0.00    0.000    0.000    NA    NA
+##  [4,] 4162489 1616297 104486.62 15982.39     0.000    0.000    0.00    0.000       NA    NA    NA
+##  [5,] 3903230 1605598 160905.57 24194.32 11622.131    0.000    0.00       NA       NA    NA    NA
+##  [6,] 4052230 1623940 131721.42 26685.98 14095.805 6261.739      NA       NA       NA    NA    NA
+##  [7,] 4087125 1593968  96483.79 40310.11  4930.009       NA      NA       NA       NA    NA    NA
+##  [8,] 4059058 1771141 170374.72 37317.06        NA       NA      NA       NA       NA    NA    NA
+##  [9,] 4033678 1309634 140624.40       NA        NA       NA      NA       NA       NA    NA    NA
+## [10,] 4141278 1615333        NA       NA        NA       NA      NA       NA       NA    NA    NA
+## [11,] 3443223      NA        NA       NA        NA       NA      NA       NA       NA    NA    NA
 ```
 ]
 ]
@@ -801,7 +545,7 @@ incremental_triangle(observed_data,
 .pull-right[
 
 ```r
-cumulative_triangle(observed_data,
+cumulative_triangle(observed_yearly,
                     variable = 'size',
                     lower_na = TRUE)
 ```
@@ -809,17 +553,18 @@ cumulative_triangle(observed_data,
 .tiny[
 
 ```
-##          [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]    [,9]   [,10]
-##  [1,] 4532915 6272614 6394490 6420442 6429747 6436450 6445929 6452146 6455614 6455614
-##  [2,] 4414954 6088531 6195946 6215419 6215419 6215419 6215419 6215419 6215419      NA
-##  [3,] 4786833 6572449 6721689 6781037 6795895 6800299 6800299 6800299      NA      NA
-##  [4,] 4653451 6267504 6395404 6431618 6440919 6440919 6440919      NA      NA      NA
-##  [5,] 4321019 6230104 6389351 6438535 6450263 6450263      NA      NA      NA      NA
-##  [6,] 4417129 6139280 6243187 6308779 6323908      NA      NA      NA      NA      NA
-##  [7,] 4538329 6256837 6402975 6422224      NA      NA      NA      NA      NA      NA
-##  [8,] 4578285 6196486 6273540      NA      NA      NA      NA      NA      NA      NA
-##  [9,] 4503558 6259801      NA      NA      NA      NA      NA      NA      NA      NA
-## [10,] 4575529      NA      NA      NA      NA      NA      NA      NA      NA      NA
+##          [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]    [,9]   [,10]   [,11]
+##  [1,] 4075901 5685977 5798533 5823202 5833881 5842722 5852200 5858418 5861886 5861886 5861886
+##  [2,] 4037070 5499009 5561632 5580150 5580150 5580150 5580150 5580150 5580150 5580150      NA
+##  [3,] 4322579 6096700 6202550 6243979 6268078 6275109 6275109 6275109 6275109      NA      NA
+##  [4,] 4162489 5778787 5883273 5899256 5899256 5899256 5899256 5899256      NA      NA      NA
+##  [5,] 3903230 5508828 5669733 5693928 5705550 5705550 5705550      NA      NA      NA      NA
+##  [6,] 4052230 5676170 5807891 5834577 5848673 5854935      NA      NA      NA      NA      NA
+##  [7,] 4087125 5681093 5777577 5817887 5822817      NA      NA      NA      NA      NA      NA
+##  [8,] 4059058 5830199 6000574 6037891      NA      NA      NA      NA      NA      NA      NA
+##  [9,] 4033678 5343311 5483936      NA      NA      NA      NA      NA      NA      NA      NA
+## [10,] 4141278 5756610      NA      NA      NA      NA      NA      NA      NA      NA      NA
+## [11,] 3443223      NA      NA      NA      NA      NA      NA      NA      NA      NA      NA
 ```
 ]
 ]
@@ -836,7 +581,7 @@ name: chainladder
 ---
 # Mack chain ladder method
 &lt;br&gt;
-Assumptions Mack (1993) .hi-pink[chain ladder method]:
+Assumptions underneath Mack's (1993) .hi-pink[chain ladder method]:
 
 1. There exist development factors `\(f_j\)` such that
 `$$E(C_{i, j+1} \mid C_{i,1}, \ldots, C_{i, j}) = C_{i, j} \cdot f_j \quad \text{for} \quad 1 \leq i \leq l, 1 \leq j \leq l-1,$$`
@@ -851,7 +596,7 @@ with `\(l\)` the dimension of the runoff triangle.
 
 * Method based on the .hi-pink[cumulative triangle]!
 
-* Assumption 1. and 2. add an .hi-pink[Markov property]. Future evolutions of the reserve depend only on the last known situation.
+* Assumption 1. and 2. add a .hi-pink[Markov property]. Future evolutions of the reserve depend only on the last known situation!
 
 ---
 # Mack chain ladder method (continued)
@@ -861,7 +606,7 @@ Estimating the .hi-pink[development factors] `\(\hat{f}_j\)`:
 `$$\hat{f}_{j} = \frac{\sum_{i=1}^{l-j} C_{i,j+1}}{\sum_{i=1}^{l-j} C_{i,j}}.$$`
 
 ```r
-triangle &lt;- cumulative_triangle(observed_data, variable = 'size')
+triangle &lt;- cumulative_triangle(observed_yearly, variable = 'size')
 l &lt;- nrow(triangle)
 f &lt;- rep(0, l-1)
 
@@ -873,7 +618,7 @@ f
 ```
 
 ```
-## [1] 1.381312 1.019846 1.006146 1.001563 1.000344 1.000366 1.000319 1.000274 1.000000
+##  [1] 1.391002 1.021245 1.004906 1.001600 1.000630 1.000323 1.000263 1.000196 1.000000 1.000000
 ```
 
 Development factors should converge to 1 for high development years.
@@ -899,17 +644,18 @@ triangle_completed
 .tiny[
 
 ```
-##          [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]    [,9]   [,10]
-##  [1,] 4532915 6272614 6394490 6420442 6429747 6436450 6445929 6452146 6455614 6455614
-##  [2,] 4414954 6088531 6195946 6215419 6215419 6215419 6215419 6215419 6215419 6215419
-##  [3,] 4786833 6572449 6721689 6781037 6795895 6800299 6800299 6800299 6802161 6802161
-##  [4,] 4653451 6267504 6395404 6431618 6440919 6440919 6440919 6442977 6444741 6444741
-##  [5,] 4321019 6230104 6389351 6438535 6450263 6450263 6452624 6454685 6456452 6456452
-##  [6,] 4417129 6139280 6243187 6308779 6323908 6326081 6328397 6330418 6332152 6332152
-##  [7,] 4538329 6256837 6402975 6422224 6432261 6434470 6436826 6438882 6440645 6440645
-##  [8,] 4578285 6196486 6273540 6312100 6321965 6324137 6326452 6328473 6330206 6330206
-##  [9,] 4503558 6259801 6384034 6423273 6433312 6435522 6437878 6439934 6441698 6441698
-## [10,] 4575529 6320235 6445667 6485285 6495420 6497652 6500030 6502107 6503887 6503887
+##          [,1]    [,2]    [,3]    [,4]    [,5]    [,6]    [,7]    [,8]    [,9]   [,10]   [,11]
+##  [1,] 4075901 5685977 5798533 5823202 5833881 5842722 5852200 5858418 5861886 5861886 5861886
+##  [2,] 4037070 5499009 5561632 5580150 5580150 5580150 5580150 5580150 5580150 5580150 5580150
+##  [3,] 4322579 6096700 6202550 6243979 6268078 6275109 6275109 6275109 6275109 6275109 6275109
+##  [4,] 4162489 5778787 5883273 5899256 5899256 5899256 5899256 5899256 5900411 5900411 5900411
+##  [5,] 3903230 5508828 5669733 5693928 5705550 5705550 5705550 5707052 5708170 5708170 5708170
+##  [6,] 4052230 5676170 5807891 5834577 5848673 5854935 5856829 5858371 5859518 5859518 5859518
+##  [7,] 4087125 5681093 5777577 5817887 5822817 5826485 5828370 5829905 5831046 5831046 5831046
+##  [8,] 4059058 5830199 6000574 6037891 6047551 6051361 6053318 6054913 6056098 6056098 6056098
+##  [9,] 4033678 5343311 5483936 5510838 5519655 5523132 5524919 5526374 5527456 5527456 5527456
+## [10,] 4141278 5756610 5878910 5907750 5917202 5920930 5922845 5924405 5925565 5925565 5925565
+## [11,] 3443223 4789529 4891282 4915278 4923142 4926243 4927837 4929134 4930100 4930100 4930100
 ```
 ]
 ]
@@ -924,17 +670,18 @@ cum2incr(triangle_completed)
 .tiny[
 
 ```
-##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]     [,7]     [,8]     [,9] [,10]
-##  [1,] 4532915 1739699 121876.31 25951.66  9304.915 6703.063 9478.770 6217.266 3468.364     0
-##  [2,] 4414954 1673577 107415.07 19472.27     0.000    0.000    0.000    0.000    0.000     0
-##  [3,] 4786833 1785616 149239.81 59348.18 14857.743 4404.145    0.000    0.000 1861.914     0
-##  [4,] 4653451 1614053 127900.21 36213.57  9301.109    0.000    0.000 2057.632 1764.079     0
-##  [5,] 4321019 1909085 159246.74 49184.25 11727.691    0.000 2361.270 2061.371 1767.285     0
-##  [6,] 4417129 1722151 103906.89 65592.12 15129.218 2172.474 2315.810 2021.685 1733.261     0
-##  [7,] 4538329 1718509 146138.00 19248.11 10037.169 2209.697 2355.488 2056.324 1762.958     0
-##  [8,] 4578285 1618201  77053.93 38559.90  9865.059 2171.807 2315.098 2021.064 1732.728     0
-##  [9,] 4503558 1756243 124232.58 39239.04 10038.809 2210.058 2355.873 2056.660 1763.246     0
-## [10,] 4575529 1744706 125431.95 39617.87 10135.726 2231.395 2378.618 2076.516 1780.269     0
+##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]     [,7]     [,8]      [,9] [,10] [,11]
+##  [1,] 4075901 1610076 112556.58 24668.43 10679.546 8840.487 9478.770 6217.266 3468.3641     0     0
+##  [2,] 4037070 1461939  62622.23 18517.80     0.000    0.000    0.000    0.000    0.0000     0     0
+##  [3,] 4322579 1774121 105850.01 41429.20 24098.625 7030.788    0.000    0.000    0.0000     0     0
+##  [4,] 4162489 1616297 104486.62 15982.39     0.000    0.000    0.000    0.000 1155.0830     0     0
+##  [5,] 3903230 1605598 160905.57 24194.32 11622.131    0.000    0.000 1502.662 1117.4493     0     0
+##  [6,] 4052230 1623940 131721.42 26685.98 14095.805 6261.739 1893.935 1542.505 1147.0778     0     0
+##  [7,] 4087125 1593968  96483.79 40310.11  4930.009 3667.976 1884.732 1535.009 1141.5040     0     0
+##  [8,] 4059058 1771141 170374.72 37317.06  9660.235 3809.544 1957.475 1594.254 1185.5609     0     0
+##  [9,] 4033678 1309634 140624.40 26902.60  8816.985 3477.005 1786.605 1455.090 1082.0723     0     0
+## [10,] 4141278 1615333 122299.67 28840.23  9452.018 3727.432 1915.283 1559.891 1160.0073     0     0
+## [11,] 3443223 1346306 101753.93 23995.21  7864.126 3101.242 1593.525 1297.837  965.1318     0     0
 ```
 ]
 ]
@@ -960,7 +707,7 @@ data.frame(reserve_cl = reserve_cl,
 
 ```
 ##   reserve_cl reserve_actual difference relative_difference_pct
-## 1    2205459        2468246  -262787.3               -10.64672
+## 1    1734146        2149312  -415165.1               -19.31619
 ```
 
 ---
@@ -970,7 +717,7 @@ These calculations are already implemented in the {ChainLadder} package.
 
 ```r
 require(ChainLadder)
-triangle &lt;- cumulative_triangle(observed_data, variable = 'size')
+triangle &lt;- cumulative_triangle(observed_yearly, variable = 'size')
 MackChainLadder(triangle)
 ```
 
@@ -981,25 +728,26 @@ MackChainLadder(triangle)
 ```
 ## MackChainLadder(Triangle = triangle)
 ## 
-##       Latest Dev.To.Date  Ultimate      IBNR Mack.S.E CV(IBNR)
-## 1  6,455,614       1.000 6,455,614         0        0      NaN
-## 2  6,215,419       1.000 6,215,419         0    1,243      Inf
-## 3  6,800,299       1.000 6,802,161     1,862    3,366   1.8079
-## 4  6,440,919       0.999 6,444,741     3,822    5,265   1.3777
-## 5  6,450,263       0.999 6,456,452     6,190    7,483   1.2089
-## 6  6,323,908       0.999 6,332,152     8,243    8,128   0.9860
-## 7  6,422,224       0.997 6,440,645    18,422   10,090   0.5477
-## 8  6,273,540       0.991 6,330,206    56,666   22,280   0.3932
-## 9  6,259,801       0.972 6,441,698   181,896   35,842   0.1970
-## 10 4,575,529       0.704 6,503,887 1,928,358  137,089   0.0711
+##       Latest Dev.To.Date  Ultimate     IBNR Mack.S.E CV(IBNR)
+## 1  5,861,886       1.000 5,861,886 0.00e+00        0      NaN
+## 2  5,580,150       1.000 5,580,150 0.00e+00      635      Inf
+## 3  6,275,109       1.000 6,275,109 9.31e-10      693 7.44e+11
+## 4  5,899,256       1.000 5,900,411 1.16e+03    2,417 2.09e+00
+## 5  5,705,550       1.000 5,708,170 2.62e+03    4,164 1.59e+00
+## 6  5,854,935       0.999 5,859,518 4.58e+03    6,288 1.37e+00
+## 7  5,822,817       0.999 5,831,046 8.23e+03    7,643 9.29e-01
+## 8  6,037,891       0.997 6,056,098 1.82e+04   11,916 6.54e-01
+## 9  5,483,936       0.992 5,527,456 4.35e+04   14,755 3.39e-01
+## 10 5,756,610       0.971 5,925,565 1.69e+05   40,015 2.37e-01
+## 11 3,443,223       0.698 4,930,100 1.49e+06  126,084 8.48e-02
 ## 
 ##                  Totals
-## Latest:   62,217,515.46
+## Latest:   61,721,361.87
 ## Dev:               0.97
-## Ultimate: 64,422,974.02
-## IBNR:      2,205,458.56
-## Mack.S.E     148,272.46
-## CV(IBNR):          0.07
+## Ultimate: 63,455,508.27
+## IBNR:      1,734,146.40
+## Mack.S.E     136,785.03
+## CV(IBNR):          0.08
 ```
 ]
 ]
@@ -1020,7 +768,7 @@ $$ X_{i,j} \sim \texttt{POI}(\alpha_i \cdot \beta_j), \quad 1 \leq i,j \leq l.$$
 .pull-left[
 
 ```r
-triangle &lt;- incremental_triangle(observed_data, 
+triangle &lt;- incremental_triangle(observed_yearly, 
                                  variable = 'size')
 
 triangle_long &lt;- data.frame(
@@ -1038,12 +786,12 @@ head(triangle_long)
 
 ```
 ##   occ.year dev.year    size
-## 1        1        1 4532915
-## 2        2        1 4414954
-## 3        3        1 4786833
-## 4        4        1 4653451
-## 5        5        1 4321019
-## 6        6        1 4417129
+## 1        1        1 4075901
+## 2        2        1 4037070
+## 3        3        1 4322579
+## 4        4        1 4162489
+## 5        5        1 3903230
+## 6        6        1 4052230
 ```
 ]
 
@@ -1084,40 +832,42 @@ summary(fit)
 ## 
 ## Deviance Residuals: 
 ##      Min        1Q    Median        3Q       Max  
-## -139.185   -64.152    -4.062    38.541   132.371  
+## -169.664   -55.719    -1.113    42.518   123.909  
 ## 
 ## Coefficients:
 ##                      Estimate Std. Error   z value Pr(&gt;|z|)    
-## (Intercept)         1.533e+01  4.029e-04 38048.572  &lt; 2e-16 ***
-## factor(occ.year)2  -3.792e-02  5.620e-04   -67.473  &lt; 2e-16 ***
-## factor(occ.year)3   5.229e-02  5.495e-04    95.155  &lt; 2e-16 ***
-## factor(occ.year)4  -1.686e-03  5.570e-04    -3.027 0.002472 ** 
-## factor(occ.year)5   1.298e-04  5.568e-04     0.233 0.815596    
-## factor(occ.year)6  -1.931e-02  5.596e-04   -34.510  &lt; 2e-16 ***
-## factor(occ.year)7  -2.322e-03  5.574e-04    -4.165 3.12e-05 ***
-## factor(occ.year)8  -1.962e-02  5.608e-04   -34.979  &lt; 2e-16 ***
-## factor(occ.year)9  -2.158e-03  5.615e-04    -3.843 0.000121 ***
-## factor(occ.year)10  7.450e-03  6.171e-04    12.072  &lt; 2e-16 ***
-## factor(dev.year)2  -9.641e-01  2.982e-04 -3233.538  &lt; 2e-16 ***
-## factor(dev.year)3  -3.597e+00  1.017e-03 -3537.016  &lt; 2e-16 ***
-## factor(dev.year)4  -4.749e+00  1.915e-03 -2480.500  &lt; 2e-16 ***
-## factor(dev.year)5  -6.112e+00  4.076e-03 -1499.723  &lt; 2e-16 ***
-## factor(dev.year)6  -7.626e+00  9.491e-03  -803.524  &lt; 2e-16 ***
-## factor(dev.year)7  -7.562e+00  1.027e-02  -736.097  &lt; 2e-16 ***
-## factor(dev.year)8  -7.698e+00  1.268e-02  -606.859  &lt; 2e-16 ***
-## factor(dev.year)9  -7.852e+00  1.698e-02  -462.340  &lt; 2e-16 ***
-## factor(dev.year)10 -2.363e+01  3.852e+01    -0.613 0.539604    
+## (Intercept)         1.523e+01  4.220e-04 36079.449   &lt;2e-16 ***
+## factor(occ.year)2  -4.926e-02  5.914e-04   -83.281   &lt;2e-16 ***
+## factor(occ.year)3   6.812e-02  5.744e-04   118.589   &lt;2e-16 ***
+## factor(occ.year)4   6.550e-03  5.832e-04    11.232   &lt;2e-16 ***
+## factor(occ.year)5  -2.657e-02  5.881e-04   -45.183   &lt;2e-16 ***
+## factor(occ.year)6  -4.040e-04  5.843e-04    -0.691    0.489    
+## factor(occ.year)7  -5.275e-03  5.851e-04    -9.015   &lt;2e-16 ***
+## factor(occ.year)8   3.259e-02  5.799e-04    56.205   &lt;2e-16 ***
+## factor(occ.year)9  -5.874e-02  5.943e-04   -98.853   &lt;2e-16 ***
+## factor(occ.year)10  1.080e-02  5.873e-04    18.397   &lt;2e-16 ***
+## factor(occ.year)11 -1.731e-01  6.845e-04  -252.915   &lt;2e-16 ***
+## factor(dev.year)2  -9.390e-01  2.950e-04 -3183.012   &lt;2e-16 ***
+## factor(dev.year)3  -3.522e+00  9.734e-04 -3617.713   &lt;2e-16 ***
+## factor(dev.year)4  -4.966e+00  2.096e-03 -2369.345   &lt;2e-16 ***
+## factor(dev.year)5  -6.082e+00  3.914e-03 -1554.030   &lt;2e-16 ***
+## factor(dev.year)6  -7.012e+00  6.724e-03 -1042.827   &lt;2e-16 ***
+## factor(dev.year)7  -7.678e+00  1.027e-02  -747.396   &lt;2e-16 ***
+## factor(dev.year)8  -7.883e+00  1.268e-02  -621.512   &lt;2e-16 ***
+## factor(dev.year)9  -8.180e+00  1.698e-02  -481.669   &lt;2e-16 ***
+## factor(dev.year)10 -2.450e+01  4.491e+01    -0.546    0.585    
+## factor(dev.year)11 -2.453e+01  6.352e+01    -0.386    0.699    
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
 ## (Dispersion parameter for poisson family taken to be 1)
 ## 
-##     Null deviance: 132018023  on 54  degrees of freedom
-## Residual deviance:    230225  on 36  degrees of freedom
-##   (45 observations deleted due to missingness)
+##     Null deviance: 139924691  on 65  degrees of freedom
+## Residual deviance:    305443  on 45  degrees of freedom
+##   (55 observations deleted due to missingness)
 ## AIC: Inf
 ## 
-## Number of Fisher Scoring iterations: 6
+## Number of Fisher Scoring iterations: 7
 ```
 ]
 
@@ -1145,19 +895,20 @@ triangle_long %&gt;%
 .tiny[
 
 ```
-## # A tibble: 10 x 11
-##    occ.year     DY.1     DY.2    DY.3   DY.4   DY.5  DY.6  DY.7  DY.8  DY.9    DY.10
-##       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
-##  1        1 4532915. 1739699. 121876. 25952.  9305. 6703. 9479. 6217. 3468. 0       
-##  2        2 4414954. 1673577. 107415. 19472.     0     0     0     0     0  0.000239
-##  3        3 4786833. 1785616. 149240. 59348. 14858. 4404.    0     0  1862. 0.000261
-##  4        4 4653451. 1614053. 127900. 36214.  9301.    0     0  2058. 1764. 0.000247
-##  5        5 4321019. 1909085. 159247. 49184. 11728.    0  2361. 2061. 1767. 0.000248
-##  6        6 4417129. 1722151. 103907. 65592. 15129. 2172. 2316. 2022. 1733. 0.000243
-##  7        7 4538329. 1718509. 146138. 19248. 10037. 2210. 2355. 2056. 1763. 0.000247
-##  8        8 4578285. 1618201.  77054. 38560.  9865. 2172. 2315. 2021. 1733. 0.000243
-##  9        9 4503558. 1756243. 124233. 39239. 10039. 2210. 2356. 2057. 1763. 0.000247
-## 10       10 4575529. 1744706. 125432. 39618. 10136. 2231. 2379. 2077. 1780. 0.000250
+## # A tibble: 11 x 12
+##    occ.year     DY.1     DY.2    DY.3   DY.4   DY.5  DY.6  DY.7  DY.8  DY.9     DY.10     DY.11
+##       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+##  1        1 4075901. 1610076. 112557. 24668. 10680. 8840. 9479. 6217. 3468. 0         0        
+##  2        2 4037070. 1461939.  62622. 18518.     0     0     0     0     0  0         0.0000868
+##  3        3 4322579. 1774121. 105850. 41429. 24099. 7031.    0     0     0  0.000100  0.0000976
+##  4        4 4162489. 1616297. 104487. 15982.     0     0     0     0  1155. 0.0000941 0.0000918
+##  5        5 3903230. 1605598. 160906. 24194. 11622.    0     0  1503. 1117. 0.0000910 0.0000888
+##  6        6 4052230. 1623940. 131721. 26686. 14096. 6262. 1894. 1543. 1147. 0.0000934 0.0000912
+##  7        7 4087125. 1593968.  96484. 40310.  4930. 3668. 1885. 1535. 1142. 0.0000930 0.0000907
+##  8        8 4059058. 1771141. 170375. 37317.  9660. 3810. 1957. 1594. 1186. 0.0000965 0.0000942
+##  9        9 4033678. 1309634. 140624. 26903.  8817. 3477. 1787. 1455. 1082. 0.0000881 0.0000860
+## 10       10 4141278. 1615333. 122300. 28840.  9452. 3727. 1915. 1560. 1160. 0.0000945 0.0000922
+## 11       11 3443223. 1346306. 101754. 23995.  7864. 3101. 1594. 1298.  965. 0.0000786 0.0000767
 ```
 ]
 ]
@@ -1171,7 +922,7 @@ reserve_glm
 ```
 
 ```
-## [1] 2205459
+## [1] 1734146
 ```
 
 ]
@@ -1189,71 +940,65 @@ class: clear
 .right-column[
 
 &lt;br&gt;
-In certain lines of business, the .hi-pink[Corona pandemic] and social distancing measures have .hi-pink[reduced claim frequency].&lt;br&gt;
+We have demonstrated the estimation of the reserve (future amount paid). In this exercise you will use the same techniques to estimate the number of future payments.
 
-The R script contains code to simulate a 50% reduction in claim frequency in the months March, April and May of 2019. The new data sets are named `observed_data_covid` and `unobserved_data_covid`. &lt;br&gt;
+1. Compute the actual number of future payments from the unobserved data set.
 
-In this exercise you will investigate the effect of this reduction in claim frequency on the accuracy of the chain ladder method.&lt;br&gt;
+2. Create a cumulative triangle containing the number of payments per accident and development year.
 
+3. Estimate the future number of payments with the chain ladder method implemented in the {ChainLadder} package. 
 
-
-
-
-
-
-1. Compute the actual reserve from the covid data set.
-
-2. Estimate the reserve using the chain ladder method from the {ChainLadder} package.
-
-3. Compute the difference between the estimated and actual reserve. How many standard deviations is this error?
+4. Compute the difference between the estimated and actual number of payments. Express this error in terms of standard deviations.
 ]
 
 ---
 class: clear
 
 .pull-left[
-For .hi-pink[Q.1] we compute the actual reserve from the unobserved data.
+For .hi-pink[Q.1] we compute the actual number of future payments from `unobserved_yearly`.
 
 
 ```r
-reserve_covid_actual &lt;- sum(unobserved_data_covid$size)
-reserve_covid_actual
+payment_actual &lt;- sum(unobserved_yearly$payment)
+payment_actual
 ```
 
 ```
-## [1] 2389277
+## [1] 617
 ```
 
-The reserve is smaller since less claims have occurred in the past. However, the difference is small since many claims from these months have already settled.
+For .hi-pink[Q.2] we use `cumulative_triangle` with `variable = 'payment'` to create a payment triangle .
 
-```r
-c(reserve_actual, reserve_covid_actual)
-```
-
-```
-## [1] 2468246 2389277
-```
-
-The effect on the amount already paid is larger.
 
 ```r
-c(already_paid_no_covid = sum(observed_data$size),
-  already_paid_covid = sum(observed_data_covid$size))
+triangle &lt;- cumulative_triangle(observed_yearly, 
+                                variable = 'payment')
 ```
 
+.tiny[
+
 ```
-## already_paid_no_covid    already_paid_covid 
-##              62217515              61504837
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,] 2054 2577 2594 2600 2602 2603 2604 2605 2606  2606  2606
+##  [2,] 2074 2556 2572 2576 2576 2576 2576 2576 2576  2576    NA
+##  [3,] 2106 2655 2680 2685 2689 2691 2691 2691 2691    NA    NA
+##  [4,] 2033 2565 2589 2594 2594 2594 2594 2594   NA    NA    NA
+##  [5,] 2008 2481 2513 2520 2522 2522 2522   NA   NA    NA    NA
+##  [6,] 2035 2533 2559 2563 2565 2567   NA   NA   NA    NA    NA
+##  [7,] 2028 2515 2532 2537 2538   NA   NA   NA   NA    NA    NA
+##  [8,] 2030 2558 2592 2601   NA   NA   NA   NA   NA    NA    NA
+##  [9,] 2005 2449 2473   NA   NA   NA   NA   NA   NA    NA    NA
+## [10,] 2100 2607   NA   NA   NA   NA   NA   NA   NA    NA    NA
+## [11,] 1784   NA   NA   NA   NA   NA   NA   NA   NA    NA    NA
 ```
+]
 ]
 
 .pull-right[
-For .hi-pink[Q.2] we appy the chain ladder method to the cumulative runoff triangle.
+For .hi-pink[Q.3] we appy the chain ladder method to this payment triangle.
 
 ```r
 require(ChainLadder)
-triangle &lt;- cumulative_triangle(observed_data_covid, 
-                                variable = 'size')
 cl &lt;- MackChainLadder(triangle)
 cl
 ```
@@ -1262,25 +1007,26 @@ cl
 ```
 ## MackChainLadder(Triangle = triangle)
 ## 
-##       Latest Dev.To.Date  Ultimate      IBNR Mack.S.E CV(IBNR)
-## 1  6,455,614       1.000 6,455,614         0        0      NaN
-## 2  6,215,419       1.000 6,215,419         0    1,243      Inf
-## 3  6,800,299       1.000 6,802,161     1,862    3,366   1.8079
-## 4  6,440,919       0.999 6,444,741     3,822    5,265   1.3777
-## 5  6,450,263       0.999 6,456,452     6,190    7,483   1.2089
-## 6  6,323,908       0.999 6,332,152     8,243    8,128   0.9860
-## 7  6,422,224       0.997 6,440,645    18,422   10,090   0.5477
-## 8  6,273,540       0.991 6,330,206    56,666   22,280   0.3932
-## 9  6,259,801       0.972 6,441,698   181,896   35,842   0.1970
-## 10 3,862,850       0.704 5,490,850 1,628,000  124,951   0.0768
+##    Latest Dev.To.Date Ultimate    IBNR Mack.S.E CV(IBNR)
+## 1   2,606       1.000    2,606   0.000    0.000      NaN
+## 2   2,576       1.000    2,576   0.000    0.121      Inf
+## 3   2,691       1.000    2,691   0.000    0.125      Inf
+## 4   2,594       1.000    2,594   0.330    0.677   2.0532
+## 5   2,522       1.000    2,523   0.561    0.862   1.5354
+## 6   2,567       1.000    2,568   0.769    0.998   1.2973
+## 7   2,538       0.999    2,540   1.577    1.435   0.9101
+## 8   2,601       0.999    2,604   3.200    2.069   0.6464
+## 9   2,473       0.997    2,481   8.443    2.673   0.3166
+## 10  2,607       0.987    2,640  33.472    7.535   0.2251
+## 11  1,784       0.793    2,250 466.225   28.387   0.0609
 ## 
-##                  Totals
-## Latest:   61,504,836.84
-## Dev:               0.97
-## Ultimate: 63,409,936.76
-## IBNR:      1,905,099.93
-## Mack.S.E     136,795.35
-## CV(IBNR):          0.07
+##              Totals
+## Latest:   27,559.00
+## Dev:           0.98
+## Ultimate: 28,073.58
+## IBNR:        514.58
+## Mack.S.E      30.08
+## CV(IBNR):      0.06
 ```
 ]
 ]
@@ -1289,29 +1035,29 @@ cl
 class: clear
 
 .pull-left[
-For .hi-pink[Q.3] we compute the prediction error of the chain ladder method.
+For .hi-pink[Q.4] we compute the prediction error of the chain ladder method.
 
 
 ```r
 ultimate &lt;- sum(cum2incr(cl$FullTriangle))
 already_paid &lt;- sum(cum2incr(cl$Triangle), na.rm = TRUE)
 
-reserve_covid_cl &lt;-  ultimate - already_paid
+payment_cl &lt;-  ultimate - already_paid
 sigma_cl &lt;- as.numeric(cl$Total.Mack.S.E)
 
-error = reserve_covid_actual - reserve_covid_cl
+error = payment_actual - payment_cl
 
 round(c(error = error, 
-        pct_error = error / reserve_covid_actual * 100,
+        pct_error = error / payment_actual * 100,
         std.dev = error / sigma_cl),2)
 ```
 
 ```
 ##     error pct_error   std.dev 
-## 484177.34     20.26      3.54
+##    102.42     16.60      3.41
 ```
 
-The reduction in claim frequency in the months March, April and May has reduced the accuracy of the chain ladder method.
+For our data set, the chain ladder method significantly underestimates the number of future payments.
 ]
 
 .pull-right[
@@ -1319,17 +1065,18 @@ Actual triangle:
 .tiny[
 
 ```
-##          [,1]    [,2]      [,3]     [,4]      [,5]     [,6]     [,7]     [,8]     [,9] [,10]
-##  [1,] 4532915 1739699 121876.31 25951.66  9304.915 6703.063 9478.770 6217.266 3468.364     0
-##  [2,] 4414954 1673577 107415.07 19472.27     0.000    0.000    0.000    0.000    0.000     0
-##  [3,] 4786833 1785616 149239.81 59348.18 14857.743 4404.145    0.000    0.000    0.000     0
-##  [4,] 4653451 1614053 127900.21 36213.57  9301.109    0.000    0.000    0.000    0.000     0
-##  [5,] 4321019 1909085 159246.74 49184.25 11727.691    0.000 8367.837 1250.830    0.000     0
-##  [6,] 4417129 1722151 103906.89 65592.12 15129.218    0.000    0.000    0.000    0.000     0
-##  [7,] 4538329 1718509 146138.00 19248.11  8206.603 1255.568    0.000    0.000    0.000     0
-##  [8,] 4578285 1618201  77053.93 20586.47  4744.763    0.000    0.000    0.000    0.000     0
-##  [9,] 4503558 1756243 153002.08 50348.72 10709.289 4574.275    0.000    0.000    0.000     0
-## [10,] 3862850 1801338 214885.47 77394.80 26305.781 6306.792    0.000    0.000    0.000     0
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,] 2054  523   17    6    2    1    1    1    1     0     0
+##  [2,] 2074  482   16    4    0    0    0    0    0     0     0
+##  [3,] 2106  549   25    5    4    2    0    0    0     0     0
+##  [4,] 2033  532   24    5    0    0    0    0    0     0     0
+##  [5,] 2008  473   32    7    2    0    0    0    0     0     0
+##  [6,] 2035  498   26    4    2    2    1    0    0     0     0
+##  [7,] 2028  487   17    5    1    1    0    0    0     0     0
+##  [8,] 2030  528   34    9    3    1    0    0    0     0     0
+##  [9,] 2005  444   24    6    2    0    0    0    0     0     0
+## [10,] 2100  507   19    5    3    1    0    0    0     0     0
+## [11,] 1784  524   39    8    3    1    0    0    0     0     0
 ```
 ]
 Predicted triangle:
@@ -1337,20 +1084,22 @@ Predicted triangle:
 
 ```
 ##       dev
-## origin       1       2         3        4         5        6        7        8        9 10
-##     1  4532915 1739699 121876.31 25951.66  9304.915 6703.063 9478.770 6217.266 3468.364  0
-##     2  4414954 1673577 107415.07 19472.27     0.000    0.000    0.000    0.000    0.000  0
-##     3  4786833 1785616 149239.81 59348.18 14857.743 4404.145    0.000    0.000 1861.914  0
-##     4  4653451 1614053 127900.21 36213.57  9301.109    0.000    0.000 2057.632 1764.079  0
-##     5  4321019 1909085 159246.74 49184.25 11727.691    0.000 2361.270 2061.371 1767.285  0
-##     6  4417129 1722151 103906.89 65592.12 15129.218 2172.474 2315.810 2021.685 1733.261  0
-##     7  4538329 1718509 146138.00 19248.11 10037.169 2209.697 2355.488 2056.324 1762.958  0
-##     8  4578285 1618201  77053.93 38559.90  9865.059 2171.807 2315.098 2021.064 1732.728  0
-##     9  4503558 1756243 124232.58 39239.04 10038.809 2210.058 2355.873 2056.660 1763.246  0
-##     10 3862850 1472953 105894.83 33447.04  8556.998 1883.835 2008.127 1753.080 1502.977  0
+## origin    1     2        3        4        5         6         7         8         9 10 11
+##     1  2054 523.0 17.00000 6.000000 2.000000 1.0000000 1.0000000 1.0000000 1.0000000  0  0
+##     2  2074 482.0 16.00000 4.000000 0.000000 0.0000000 0.0000000 0.0000000 0.0000000  0  0
+##     3  2106 549.0 25.00000 5.000000 4.000000 2.0000000 0.0000000 0.0000000 0.0000000  0  0
+##     4  2033 532.0 24.00000 5.000000 0.000000 0.0000000 0.0000000 0.0000000 0.3295224  0  0
+##     5  2008 473.0 32.00000 7.000000 2.000000 0.0000000 0.0000000 0.2409938 0.3204066  0  0
+##     6  2035 498.0 26.00000 4.000000 2.000000 2.0000000 0.1976744 0.2453127 0.3261488  0  0
+##     7  2028 487.0 17.00000 5.000000 1.000000 0.8161821 0.1955041 0.2426194 0.3225679  0  0
+##     8  2030 528.0 34.00000 9.000000 1.582905 0.8369510 0.2004790 0.2487932 0.3307761  0  0
+##     9  2005 444.0 24.00000 5.394067 1.508290 0.7974988 0.1910288 0.2370655 0.3151839  0  0
+##     10 2100 507.0 24.48796 5.739759 1.604952 0.8486084 0.2032713 0.2522584 0.3353832  0  0
+##     11 1784 437.7 20.86878 4.891454 1.367749 0.7231888 0.1732290 0.2149761 0.2858155  0  0
 ```
 ]
 ]
+
 
 ---
 class: inverse, center, middle
@@ -1365,12 +1114,13 @@ name: chainladderfail
 
 The chain ladder method assumes that claims from all occurrence years follow the .hi-pink[same development pattern]. &lt;br&gt; 
 We construct various triangles to assess this assumption:
+
 .pull-left[
-Number of open claims begin at the start of the year:
+Number of open claims at the start of the year:
 
 ```r
 triangle_open &lt;- incremental_triangle(
-  observed_data_covid %&gt;%
+  observed_yearly %&gt;%
     mutate(open = calendar_year &lt;= settlement_year),
   variable = 'open')
 triangle_open
@@ -1378,51 +1128,53 @@ triangle_open
 .tiny[
 
 ```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 2933  802   37    7    2    1    1    1    1     0
-##  [2,] 2886  756   34    6    1    0    0    0    0    NA
-##  [3,] 3000  790   41    9    5    2    0    0   NA    NA
-##  [4,] 2937  791   28    8    2    1    0   NA   NA    NA
-##  [5,] 2908  795   44    9    2    1   NA   NA   NA    NA
-##  [6,] 2862  770   34    7    3   NA   NA   NA   NA    NA
-##  [7,] 2866  788   39    7   NA   NA   NA   NA   NA    NA
-##  [8,] 2862  744   25   NA   NA   NA   NA   NA   NA    NA
-##  [9,] 2867  772   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,] 2573   NA   NA   NA   NA   NA   NA   NA   NA    NA
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,] 2743  722   28    6    2    1    1    1    1     0     0
+##  [2,] 2725  698   24    4    1    0    0    0    0     0    NA
+##  [3,] 2810  789   35    5    5    2    1    0    0    NA    NA
+##  [4,] 2756  743   33    6    0    0    0    0   NA    NA    NA
+##  [5,] 2705  677   46    9    3    0    0   NA   NA    NA    NA
+##  [6,] 2706  689   34    8    2    2   NA   NA   NA    NA    NA
+##  [7,] 2703  706   27    7    1   NA   NA   NA   NA    NA    NA
+##  [8,] 2708  730   45   10   NA   NA   NA   NA   NA    NA    NA
+##  [9,] 2640  647   27   NA   NA   NA   NA   NA   NA    NA    NA
+## [10,] 2751  711   NA   NA   NA   NA   NA   NA   NA    NA    NA
+## [11,] 2328   NA   NA   NA   NA   NA   NA   NA   NA    NA    NA
 ```
 ]
 ]
 
 .pull-right[
-Settlement probability:
+Number of open claims at the end of the year:
 
 ```r
-triangle_settlement &lt;- incremental_triangle(
-  observed_data_covid %&gt;%
-    mutate(settlement = calendar_year == settlement_year),
-  variable = 'settlement')
-
-triangle_settlement / triangle_open
+triangle_open_end &lt;- incremental_triangle(
+  observed_yearly %&gt;%
+    mutate(open_end = (calendar_year &lt;= settlement_year) &amp; (close == 0)),
+  variable = 'open_end')
+triangle_open_end
 ```
 .tiny[
 
 ```
-##            [,1]      [,2]      [,3]      [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 0.7565632 0.9538653 0.8108108 0.7142857  0.5    0    0    0    1   NaN
-##  [2,] 0.7723493 0.9550265 0.8235294 0.8333333  1.0  NaN  NaN  NaN  NaN    NA
-##  [3,] 0.7640000 0.9481013 0.7804878 0.4444444  0.6    1  NaN  NaN   NA    NA
-##  [4,] 0.7647259 0.9646018 0.7142857 0.7500000  0.5    1  NaN   NA   NA    NA
-##  [5,] 0.7568776 0.9446541 0.7954545 0.7777778  0.5    0   NA   NA   NA    NA
-##  [6,] 0.7641509 0.9558442 0.7941176 0.5714286  1.0   NA   NA   NA   NA    NA
-##  [7,] 0.7616888 0.9505076 0.8205128 0.5714286   NA   NA   NA   NA   NA    NA
-##  [8,] 0.7672956 0.9663978 0.7600000        NA   NA   NA   NA   NA   NA    NA
-##  [9,] 0.7697942 0.9572539        NA        NA   NA   NA   NA   NA   NA    NA
-## [10,] 0.7298873        NA        NA        NA   NA   NA   NA   NA   NA    NA
+##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,]  722   28    6    2    1    1    1    1    0     0     0
+##  [2,]  698   24    4    1    0    0    0    0    0     0    NA
+##  [3,]  789   35    5    5    2    1    0    0    0    NA    NA
+##  [4,]  743   33    6    0    0    0    0    0   NA    NA    NA
+##  [5,]  677   46    9    3    0    0    0   NA   NA    NA    NA
+##  [6,]  689   34    8    2    2    1   NA   NA   NA    NA    NA
+##  [7,]  706   27    7    1    1   NA   NA   NA   NA    NA    NA
+##  [8,]  730   45   10    4   NA   NA   NA   NA   NA    NA    NA
+##  [9,]  647   27    7   NA   NA   NA   NA   NA   NA    NA    NA
+## [10,]  711   30   NA   NA   NA   NA   NA   NA   NA    NA    NA
+## [11,]  644   NA   NA   NA   NA   NA   NA   NA   NA    NA    NA
 ```
 ]
-
-The percentage of settled claims is lower in the last accident year. Indicating that more claims are still open.
 ]
+
+Less claims occurred during the last accident year, but of those that occurred many are still open.
+
 ---
 # Detecting when the chain ladder method fails
 
@@ -1434,7 +1186,7 @@ Percentage of open claims for which a payment is made.
 
 ```r
 triangle_payment &lt;- incremental_triangle(
-  observed_data_covid,
+  observed_yearly,
   variable = 'payment')
 
 triangle_payment / triangle_open
@@ -1442,17 +1194,18 @@ triangle_payment / triangle_open
 .tiny[
 
 ```
-##            [,1]      [,2]      [,3]      [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 0.7719059 0.6857855 0.5405405 0.7142857  1.0  1.0    1    1    1   NaN
-##  [2,] 0.7862093 0.7050265 0.7941176 0.8333333  0.0  NaN  NaN  NaN  NaN    NA
-##  [3,] 0.7690000 0.7050633 0.6341463 0.8888889  0.6  0.5  NaN  NaN   NA    NA
-##  [4,] 0.7793667 0.6788875 0.8214286 1.0000000  0.5  0.0  NaN   NA   NA    NA
-##  [5,] 0.7699450 0.7308176 0.7500000 0.8888889  0.5  0.0   NA   NA   NA    NA
-##  [6,] 0.7725367 0.6909091 0.7058824 0.8571429  1.0   NA   NA   NA   NA    NA
-##  [7,] 0.7665736 0.6814721 0.7692308 0.7142857   NA   NA   NA   NA   NA    NA
-##  [8,] 0.7861635 0.6854839 0.7200000        NA   NA   NA   NA   NA   NA    NA
-##  [9,] 0.7921172 0.7046632        NA        NA   NA   NA   NA   NA   NA    NA
-## [10,] 0.7765255        NA        NA        NA   NA   NA   NA   NA   NA    NA
+##            [,1]      [,2]      [,3]      [,4]      [,5] [,6] [,7] [,8] [,9] [,10] [,11]
+##  [1,] 0.7488152 0.7243767 0.6071429 1.0000000 1.0000000    1    1    1    1   NaN   NaN
+##  [2,] 0.7611009 0.6905444 0.6666667 1.0000000 0.0000000  NaN  NaN  NaN  NaN   NaN    NA
+##  [3,] 0.7494662 0.6958175 0.7142857 1.0000000 0.8000000    1    0  NaN  NaN    NA    NA
+##  [4,] 0.7376633 0.7160162 0.7272727 0.8333333       NaN  NaN  NaN  NaN   NA    NA    NA
+##  [5,] 0.7423290 0.6986706 0.6956522 0.7777778 0.6666667  NaN  NaN   NA   NA    NA    NA
+##  [6,] 0.7520325 0.7227866 0.7647059 0.5000000 1.0000000    1   NA   NA   NA    NA    NA
+##  [7,] 0.7502775 0.6898017 0.6296296 0.7142857 1.0000000   NA   NA   NA   NA    NA    NA
+##  [8,] 0.7496307 0.7232877 0.7555556 0.9000000        NA   NA   NA   NA   NA    NA    NA
+##  [9,] 0.7594697 0.6862442 0.8888889        NA        NA   NA   NA   NA   NA    NA    NA
+## [10,] 0.7633588 0.7130802        NA        NA        NA   NA   NA   NA   NA    NA    NA
+## [11,] 0.7663230        NA        NA        NA        NA   NA   NA   NA   NA    NA    NA
 ```
 ]
 ]
@@ -1462,7 +1215,7 @@ Average amount paid given a payment is made.
 
 ```r
 triangle_size &lt;- incremental_triangle(
-  observed_data_covid,
+  observed_yearly,
   variable = 'size')
 
 triangle_size / triangle_payment
@@ -1470,17 +1223,18 @@ triangle_size / triangle_payment
 .tiny[
 
 ```
-##           [,1]     [,2]     [,3]      [,4]      [,5]     [,6]    [,7]     [,8]     [,9] [,10]
-##  [1,] 2002.171 3163.090 6093.815  5190.332  4652.457 6703.063 9478.77 6217.266 3468.364   NaN
-##  [2,] 1945.771 3139.920 3978.336  3894.454       NaN      NaN     NaN      NaN      NaN    NA
-##  [3,] 2074.917 3205.774 5739.993  7418.522  4952.581 4404.145     NaN      NaN       NA    NA
-##  [4,] 2032.962 3005.686 5560.879  4526.696  9301.109      NaN     NaN       NA       NA    NA
-##  [5,] 1929.888 3285.860 4825.659  6148.031 11727.691      NaN      NA       NA       NA    NA
-##  [6,] 1997.797 3237.126 4329.454 10932.020  5043.073       NA      NA       NA       NA    NA
-##  [7,] 2065.694 3200.202 4871.267  3849.622        NA       NA      NA       NA       NA    NA
-##  [8,] 2034.793 3172.943 4280.774        NA        NA       NA      NA       NA       NA    NA
-##  [9,] 1983.073 3228.389       NA        NA        NA       NA      NA       NA       NA    NA
-## [10,] 1933.359       NA       NA        NA        NA       NA      NA       NA       NA    NA
+##           [,1]     [,2]     [,3]     [,4]     [,5]     [,6]    [,7]     [,8]     [,9] [,10] [,11]
+##  [1,] 1984.372 3078.539 6620.975 4111.405 5339.773 8840.487 9478.77 6217.266 3468.364   NaN   NaN
+##  [2,] 1946.514 3033.069 3913.889 4629.451      NaN      NaN     NaN      NaN      NaN   NaN    NA
+##  [3,] 2052.507 3231.551 4234.001 8285.841 6024.656 3515.394     NaN      NaN      NaN    NA    NA
+##  [4,] 2047.462 3038.153 4353.609 3196.478      NaN      NaN     NaN      NaN       NA    NA    NA
+##  [5,] 1943.840 3394.499 5028.299 3456.332 5811.065      NaN     NaN       NA       NA    NA    NA
+##  [6,] 1991.268 3260.923 5066.209 6671.495 7047.903 3130.870      NA       NA       NA    NA    NA
+##  [7,] 2015.347 3273.035 5675.517 8062.022 4930.009       NA      NA       NA       NA    NA    NA
+##  [8,] 1999.536 3354.434 5011.021 4146.339       NA       NA      NA       NA       NA    NA    NA
+##  [9,] 2011.809 2949.626 5859.350       NA       NA       NA      NA       NA       NA    NA    NA
+## [10,] 1972.037 3186.061       NA       NA       NA       NA      NA       NA       NA    NA    NA
+## [11,] 1930.058       NA       NA       NA       NA       NA      NA       NA       NA    NA    NA
 ```
 ]
 ]
@@ -1489,18 +1243,18 @@ triangle_size / triangle_payment
 # Detecting when the chain ladder method fails
 
 The chain ladder method assumes that claims from all occurrence years follow the .hi-pink[same development pattern]. &lt;br&gt; 
-Inspecting the (granular) daily data:
+We inspect the (granular) daily claims data:
 
 .pull-left[
 
 ```r
-claims_covid &lt;- observed_data_covid %&gt;%
+claims &lt;- observed_daily %&gt;%
   group_by(accident_number) %&gt;%
   slice(1) %&gt;%
   ungroup()
 
 
-occ_intensity &lt;- claims_covid %&gt;%
+occ_intensity &lt;- claims %&gt;%
   group_by(accident_date) %&gt;%
   summarise(count = n())
 
@@ -1518,9 +1272,9 @@ ggplot(occ_intensity) +
 ]
 
 .pull-right[
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-76-1.png)&lt;!-- --&gt;
+![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-60-1.png)&lt;!-- --&gt;
 
-The moving average indicates a period with decreased claim frequency in 2019
+The moving average indicates a period with decreased claim frequency in 2020.
 
 ]
 
@@ -1528,17 +1282,20 @@ The moving average indicates a period with decreased claim frequency in 2019
 # Detecting when the chain ladder method fails
 
 The chain ladder method assumes that claims from all occurrence years follow the .hi-pink[same development pattern]. &lt;br&gt; 
-Inspecting the (granular) daily data:
+We inspect the (granular) daily claims data:
 
 .pull-left[
 
 ```r
 require(lubridate)
-claims_covid &lt;- claims_covid %&gt;%
+claims &lt;- claims %&gt;%
   mutate(start_year = floor_date(accident_date, unit = 'year'),
-         time = as.numeric(accident_date - start_year) / 366)
+         time = as.numeric(accident_date - start_year) / 366,
+         accident_year = year(accident_date),
+         reporting_year = year(reporting_date)) %&gt;%
+  filter(accident_year == reporting_year)
 
-ggplot(claims_covid) +
+ggplot(claims) +
   theme_bw() +
   geom_density(aes(x = time, 
                    group = factor(accident_year), 
@@ -1548,490 +1305,299 @@ ggplot(claims_covid) +
 
 
 .pull-right[
-Density of when claims occur within each accident year. The chain ladder method works best when the densities look similar for all accident years.
+Density showing claim occurrences within each accident year. The chain ladder method works best when the densities look similar across accident years.
 
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-78-1.png)&lt;!-- --&gt;
+![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-62-1.png)&lt;!-- --&gt;
 ]
 
-The occurrence intensity in accident year 9 deviates from the other accident years.
+The occurrence intensity in accident year 2020 deviates from the other accident years!
+
+
+---
+# Detecting when the chain ladder method fails
+
+The data contains a drop in claim frequency during March-June 2020. 
+
+This emulates a situation were .hi-pink[less claims occurred] due to the first .hi-pink[COVID-19 lockdown]. Such changes in the claim occurrence and development pattern can severly impact chain ladder performance.
+
+Other situations that might impact the performance of the chain ladder are:
+
+* Inflation: 
+
+  * to be detected via the triangle `size`.
+  
+* Changing product mix: 
+
+  * to be detected via the triangles `close`, `payment` and `size`.
+  
+* Internal changes in claim handling: 
+
+  * to be detected via the triangles `close` and `payment`.
+  
+* Extreme weather events: 
+
+  * to be detected via the yearly distribution of occurrence dates.
+  
+* An extremely large claim:
+
+  * to be detected via the triangle `size`.
 
 ---
 # Fixing the chain ladder method
 &lt;br&gt;
 Improve the performance of the chain ladder method by making the .hi-pink[data more homogeneous]:
 
-* .hi-pink[Group] claims by:
+* .hi-pink[group] claims by:
 
-  * claim characteristics, e.g. separate triangle for fire and water related claims in home insurance.
+  * claim characteristics, e.g. a separate triangle for fire and water related claims in home insurance.
   * occurrence time within a calendar year
 
-* .hi-pink[Omit]:
+* .hi-pink[omit]:
 
   * deviating years/cells, especially if they occurred long ago
 
-* .hi-pink[Adjust] for:
+* .hi-pink[adjust] for:
 
-  * inflation
+  * inflation.
   
 The appropriate method(s) depend on the data inspection from the previous slides.
 
 ---
 # Fixing the chain ladder method (continued)
 
-Applied to the .hi-pink[covid data set]:
+Applied to the .hi-pink[COVID-19 reserving data set]:
 
 * claim frequency has changed in the months March, April, May
-* only 2019, accident year 9, is affected
+* only 2020, i.e. accident year 10, is affected.
 
-As 2019 is a recent calendar year, we cannot omit accident year 9 from the data.
+As 2020 is a recent calendar year, we cannot omit accident year 10 from the data.
 
-We improve homogeneity in the data by splitting claims in two groups:
-* group A: claims that have occurred in March, April or May
-* group B: claims that have not occurred in March, April or May
+We illustrate three approaches to improve the homogeneity across the accident years:
 
-
-```r
-observed_data_covid &lt;- observed_data_covid %&gt;%
-  mutate(occurrence_month = as.numeric(format(accident_date, '%m')))
-
-observed_data_covidA &lt;- observed_data_covid %&gt;%
-  filter(occurrence_month %in% c(3, 4, 5))
-
-observed_data_covidB &lt;- observed_data_covid %&gt;%
-  filter(!(occurrence_month %in% c(3, 4, 5)))
-```
+* applying the chain ladder method to more granular data
+* grouping claims by occurrence month.
 
 ---
-name: yourturn
-class: clear
+# Monthly chain ladder
 
-.left-column[
-
-## &lt;i class="fa fa-edit"&gt;&lt;/i&gt; &lt;br&gt; Your turn
-
-]
-
-.right-column[
-
-In this exercise you compute the chain ladder reserve for claims in group A and B.
-
-1. Choose data set A or B and analyse the stability of the chosen data set using some of the presented detection tools.
-
-2. Compute the chain ladder reserve for group A and B separately.&lt;br&gt;Combine these estimates to obtain an estimate for the total reserve.
-
-3. Compare the new reserve estimate with the estimate obtained earlier using the chain ladder method without splitting the data.
-
-4. Compute the standard error of the reserve estimate using the formula
-
-`$$\sigma^2 = \sigma_A^2 + \sigma_B^2.$$`
-
-]
-
----
-class: clear
-
-For .hi-pink[Q.1], analysing the stability of data set A.
+A more .hi-pink[granular chain ladder] is more .hi-pink[robust] to .hi-pink[fluctuations in the occurrence process].
 
 .pull-left[
-Number of open claims begin dev.year:
 
 ```r
-triangle_open &lt;- incremental_triangle(
-  observed_data_covidA %&gt;%
-    mutate(open = calendar_year &lt;= settlement_year),
-  variable = 'open')
-triangle_open
-```
-.tiny[
+require(lubridate)
+claims &lt;- observed_daily %&gt;%
+  group_by(accident_number) %&gt;%
+  slice(1) %&gt;%
+  ungroup() %&gt;%
+  mutate(start_month = floor_date(accident_date, unit = 'month'),
+         time = as.numeric(accident_date - start_month) / 31,
+         accident_month = format(accident_date, '%Y%m'),
+         reporting_month = format(reporting_date, '%Y%m')) %&gt;%
+  filter(accident_month == reporting_month)
 
-```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,]  775   53    7    1    1    0    0    0    0     0
-##  [2,]  748   38    0    0    0    0    0    0    0    NA
-##  [3,]  773   47    5    1    1    0    0    0   NA    NA
-##  [4,]  781   52    3    0    0    0    0   NA   NA    NA
-##  [5,]  757   63    7    2    1    0   NA   NA   NA    NA
-##  [6,]  730   38    5    1    1   NA   NA   NA   NA    NA
-##  [7,]  750   59    2    1   NA   NA   NA   NA   NA    NA
-##  [8,]  704   51    8   NA   NA   NA   NA   NA   NA    NA
-##  [9,]  770   40   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,]  367   NA   NA   NA   NA   NA   NA   NA   NA    NA
+ggplot(claims) +
+  theme_bw() +
+  geom_density(aes(x = time, 
+                   group = factor(accident_month), 
+                   color = factor(accident_month))) +
+  theme(legend.position = 'none')
 ```
 ]
+
+
+.pull-right[
+Within each month the claim occurrence density looks similar:
+
+![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-64-1.png)&lt;!-- --&gt;
+
+In real (non simulated) data, these monthly densities might be disturbed by seasonal effects, weekends and holidays.
+]
+
+---
+# Monthly chain ladder
+
+Construct a .hi-pink[monthly triangle] using the observed daily data:
+
+
+```r
+triangle_month &lt;- observed_daily %&gt;%
+  mutate(accident_month = year(accident_date)*12 + month(accident_date) - 2010*12,
+         development_month = year(payment_date)*12 + month(payment_date) - 2010*12 - accident_month) %&gt;%
+  group_by(accident_month, development_month) %&gt;%
+  summarise(size = sum(payment_size)) %&gt;%
+  ungroup() %&gt;%
+  complete(expand.grid(accident_month = 1:132, development_month = 0:131), fill = list(size = 0)) %&gt;%
+  mutate(size = ifelse(accident_month + development_month &gt; 132, NA, size)) %&gt;%
+  arrange(development_month) %&gt;%
+  pivot_wider(names_from = development_month, values_from = size) %&gt;%
+  arrange(accident_month)
+
+triangle_month &lt;- as.matrix(triangle_month[, 2:132])
+```
+
+---
+# Monthly chain ladder
+
+
+
+```r
+cl &lt;- MackChainLadder(incr2cum(triangle_month))
+summary(cl)$Totals
+```
+
+```
+##                  Totals
+## Latest:    6.172136e+07
+## Dev:       9.697826e-01
+## Ultimate:  6.364453e+07
+## IBNR:      1.923173e+06
+## Mack S.E.: 1.035489e+05
+## CV(IBNR):  5.384277e-02
+```
+
+Comparing the yearly and monthly chain ladder:
+
+
+```
+##                 method cells reserve.estimate     error pct.error
+## 1  Yearly chain ladder    66          1734146 -415165.1 -19.31619
+## 2 Monthly chain ladder  8778          1923173 -226139.0 -10.52146
+```
+
+The monthly chain ladder predicts the reserve more accurately on this data set.
+
+---
+# Grouping claims by occurrence month
+
+We group claims based on the occurrence month and estimate a .hi-pink[separate yearly chain ladder] for each of these groups.
+
+.pull-left[
+
+```r
+require(lubridate)
+claims &lt;- observed_daily %&gt;%
+  group_by(accident_number) %&gt;%
+  slice(1) %&gt;%
+  ungroup() %&gt;%
+  mutate(start_month = floor_date(accident_date, unit = 'month'),
+         time = as.numeric(accident_date - start_month) / 31,
+         accident_year = format(accident_date, '%Y'),
+         reporting_year = format(reporting_date, '%Y'),
+         month = format(accident_date, '%B')) %&gt;%
+  filter(accident_year == reporting_year)
+
+ggplot(claims) +
+  facet_wrap( ~ month, ncol = 3) +
+  theme_bw() +
+  geom_density(aes(x = time, 
+                   group = factor(accident_year), 
+                   color = factor(accident_year))) 
+```
+]
+
+
+.pull-right[
+We are comparing occurrences in the same month accross different years. We are no longer comparing different months within one calendar year.
+![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-69-1.png)&lt;!-- --&gt;
+]
+
+---
+# Grouping claims by occurrence month
+
+
+.pull-left[
+Add the accident date to the data set `reserving_yearly`
+
+
+```r
+reserving_yearly &lt;- reserving_yearly %&gt;%
+  left_join(reserving_daily %&gt;% 
+              group_by(accident_number) %&gt;%
+              slice(1) %&gt;%
+              ungroup() %&gt;%
+              select(accident_number, accident_date))
+
+reserving_yearly &lt;- reserving_yearly %&gt;%
+  mutate(accident_month = format(accident_date, '%B'))
+```
+
+Create a runoff triangle for each accident month
+
+
+```r
+triangles &lt;- reserving_yearly %&gt;%
+  group_by(accident_month, accident_year, development_year) %&gt;%
+  summarise(size = sum(size)) %&gt;%
+  ungroup() %&gt;%
+  complete(expand.grid(accident_month = unique(accident_month), 
+                       accident_year = 0:10, development_year = 1:11),
+           fill = list(size = 0)) %&gt;%
+  mutate(size = ifelse(accident_year + development_year &gt; 11, NA, size))
+```
 ]
 
 .pull-right[
-Settlement probability:
 
 ```r
-triangle_settlement &lt;- incremental_triangle(
-  observed_data_covidA %&gt;%
-    mutate(settlement = calendar_year == settlement_year),
-  variable = 'settlement')
-
-triangle_settlement / triangle_open
+triangles %&gt;%
+  filter(accident_month == 'april') %&gt;%
+  arrange(development_year) %&gt;%
+  pivot_wider(names_from = development_year, values_from = size)
 ```
-.tiny[
-
-```
-##            [,1]      [,2]      [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 0.9316129 0.8679245 0.8571429  0.0    1  NaN  NaN  NaN  NaN   NaN
-##  [2,] 0.9491979 1.0000000       NaN  NaN  NaN  NaN  NaN  NaN  NaN    NA
-##  [3,] 0.9391979 0.8936170 0.8000000  0.0    1  NaN  NaN  NaN   NA    NA
-##  [4,] 0.9334187 0.9423077 1.0000000  NaN  NaN  NaN  NaN   NA   NA    NA
-##  [5,] 0.9167768 0.8888889 0.7142857  0.5    1  NaN   NA   NA   NA    NA
-##  [6,] 0.9479452 0.8684211 0.8000000  0.0    1   NA   NA   NA   NA    NA
-##  [7,] 0.9213333 0.9661017 0.5000000  0.0   NA   NA   NA   NA   NA    NA
-##  [8,] 0.9275568 0.8431373 0.6250000   NA   NA   NA   NA   NA   NA    NA
-##  [9,] 0.9480519 0.8750000        NA   NA   NA   NA   NA   NA   NA    NA
-## [10,] 0.9455041        NA        NA   NA   NA   NA   NA   NA   NA    NA
-```
-]
-]
-
----
-class: clear
-
-For .hi-pink[Q.1], analysing the stability of data set A.
-
-.pull-left[
-
-```r
-claims_covidA &lt;- observed_data_covidA %&gt;%
-  group_by(accident_number) %&gt;%
-  slice(1) %&gt;%
-  ungroup()
-
-occ_intensity &lt;- claims_covidA %&gt;%
-  group_by(accident_date, accident_year) %&gt;%
-  summarise(count = n())
-
-require(zoo)
-occ_intensity &lt;- occ_intensity %&gt;%
-  group_by(accident_year) %&gt;%
-  mutate(moving_average = rollmean(count, 14, na.pad = TRUE))
   
-
-ggplot(occ_intensity) +
-  theme_bw() +
-  geom_point(aes(x = accident_date, y = count)) +
-  geom_line(aes(x = accident_date, y = moving_average), 
-            size = 1, color = 'blue') +
-  ggtitle('Evolution of claim frequency')
-```
-]
-
-.pull-right[
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-85-1.png)&lt;!-- --&gt;
-
-We compute moving averages within each accident year. Otherwise `rollmean` would naively assume that May 31, 2010 is followed by March 1, 2011. 
-]
-
----
-class: clear
-
-For .hi-pink[Q.1], analysing the stability of data set A.
-
-.pull-left[
-
-```r
-require(lubridate)
-claims_covidA &lt;- claims_covidA %&gt;%
-  mutate(start_year = floor_date(accident_date, unit = 'year'),
-         time = as.numeric(accident_date - start_year) / 366)
-
-ggplot(claims_covidA) +
-  theme_bw() +
-  geom_density(aes(x = time, 
-                   group = factor(accident_year), 
-                   color = factor(accident_year)))
-```
-]
-
-.pull-right[
-
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-87-1.png)&lt;!-- --&gt;
-
-All densities have a similar, indicating that within each accident year the distributon of when claims occur is the same.
-]
-
-
-
----
-class: clear
-
-For .hi-pink[Q.1], analysing the stability of data set B.
-
-.pull-left[
-Number of open claims begin at the start of the year:
-
-```r
-triangle_open &lt;- incremental_triangle(
-  observed_data_covidB %&gt;%
-    mutate(open = calendar_year &lt;= settlement_year),
-  variable = 'open')
-triangle_open
-```
-.tiny[
+.tiny[  
 
 ```
-##       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 2158  749   30    6    1    1    1    1    1     0
-##  [2,] 2138  718   34    6    1    0    0    0    0    NA
-##  [3,] 2227  743   36    8    4    2    0    0   NA    NA
-##  [4,] 2156  739   25    8    2    1    0   NA   NA    NA
-##  [5,] 2151  732   37    7    1    1   NA   NA   NA    NA
-##  [6,] 2132  732   29    6    2   NA   NA   NA   NA    NA
-##  [7,] 2116  729   37    6   NA   NA   NA   NA   NA    NA
-##  [8,] 2158  693   17   NA   NA   NA   NA   NA   NA    NA
-##  [9,] 2097  732   NA   NA   NA   NA   NA   NA   NA    NA
-## [10,] 2206   NA   NA   NA   NA   NA   NA   NA   NA    NA
-```
-]
-]
-
-.pull-right[
-Settlement probability:
-
-```r
-triangle_settlement &lt;- incremental_triangle(
-  observed_data_covidB %&gt;%
-    mutate(settlement = calendar_year == settlement_year),
-  variable = 'settlement')
-
-triangle_settlement / triangle_open
-```
-.tiny[
-
-```
-##            [,1]      [,2]      [,3]      [,4] [,5] [,6] [,7] [,8] [,9] [,10]
-##  [1,] 0.6936979 0.9599466 0.8000000 0.8333333  0.0    0    0    0    1   NaN
-##  [2,] 0.7104771 0.9526462 0.8235294 0.8333333  1.0  NaN  NaN  NaN  NaN    NA
-##  [3,] 0.7031881 0.9515478 0.7777778 0.5000000  0.5    1  NaN  NaN   NA    NA
-##  [4,] 0.7036178 0.9661705 0.6800000 0.7500000  0.5    1  NaN   NA   NA    NA
-##  [5,] 0.7006044 0.9494536 0.8108108 0.8571429  0.0    0   NA   NA   NA    NA
-##  [6,] 0.7012195 0.9603825 0.7931034 0.6666667  1.0   NA   NA   NA   NA    NA
-##  [7,] 0.7051040 0.9492455 0.8378378 0.6666667   NA   NA   NA   NA   NA    NA
-##  [8,] 0.7150139 0.9754690 0.8235294        NA   NA   NA   NA   NA   NA    NA
-##  [9,] 0.7043395 0.9617486        NA        NA   NA   NA   NA   NA   NA    NA
-## [10,] 0.6940163        NA        NA        NA   NA   NA   NA   NA   NA    NA
+## # A tibble: 11 x 13
+##    accident_month accident_year    DY.1   DY.2   DY.3  DY.4  DY.5  DY.6  DY.7  DY.8  DY.9 DY.10 DY.11
+##    &lt;chr&gt;                  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 april                      0 406625. 70060.  8968. 4503. 2032.     0     0     0     0     0     0
+##  2 april                      1 392370. 39237.     0     0     0      0     0     0     0     0    NA
+##  3 april                      2 490615. 62149.     0     0     0      0     0     0     0    NA    NA
+##  4 april                      3 392533. 30396.  3977.    0     0      0     0     0    NA    NA    NA
+##  5 april                      4 426086. 40524. 19473. 5444. 5613.     0     0    NA    NA    NA    NA
+##  6 april                      5 423923. 43166.  3460.    0     0      0    NA    NA    NA    NA    NA
+##  7 april                      6 411784. 23560.  9287.    0     0     NA    NA    NA    NA    NA    NA
+##  8 april                      7 393665. 36667.     0     0    NA     NA    NA    NA    NA    NA    NA
+##  9 april                      8 394125. 30951.     0    NA    NA     NA    NA    NA    NA    NA    NA
+## 10 april                      9 388587. 24324.    NA    NA    NA     NA    NA    NA    NA    NA    NA
+## 11 april                     10 202582.    NA     NA    NA    NA     NA    NA    NA    NA    NA    NA
 ```
 ]
 ]
 
 ---
-class: clear
+# Grouping claims by occurrence month (continued)
 
-For .hi-pink[Q.1], analysing the stability of data set B.
-
-.pull-left[
-
-```r
-claims_covidB &lt;- observed_data_covidB %&gt;%
-  group_by(accident_number) %&gt;%
-  slice(1) %&gt;%
-  ungroup()
+We use the `glm` routine to apply the chain ladder method to each triangle:
 
 
-occ_intensity &lt;- claims_covidB %&gt;%
-  group_by(accident_date, accident_year) %&gt;%
-  summarise(count = n())
-
-require(zoo)
-occ_intensity &lt;- occ_intensity %&gt;%
-  group_by(accident_year) %&gt;%
-  mutate(moving_average = rollmean(count, 14, na.pad = TRUE))
-
-ggplot(occ_intensity) +
-  theme_bw() +
-  geom_point(aes(x = accident_date, y = count)) +
-  geom_line(aes(x = accident_date, y = moving_average), 
-            size = 1, color = 'blue') +
-  ggtitle('Evolution of claim frequency')
-```
-]
-
-.pull-right[
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-93-1.png)&lt;!-- --&gt;
-
-Claim frequency is stable over all accident years. No sudden jumps/decreases.
-]
-
----
-class: clear
-
-For .hi-pink[Q.1], analysing the stability of data set B.
-
-.pull-left[
+`factor(development_year) : accident_month` estimates a different effect `factor(development)` for each `accident_month`
 
 ```r
-require(lubridate)
-claims_covidB &lt;- claims_covidB %&gt;%
-  mutate(start_year = floor_date(accident_date, unit = 'year'),
-         time = as.numeric(accident_date - start_year) / 366)
+fit &lt;- glm(size ~ factor(development_year) * accident_month  + factor(accident_year) * accident_month,
+           data = triangles,
+           family = poisson(link = 'log'))
 
-ggplot(claims_covidB) +
-  theme_bw() +
-  geom_density(aes(x = time, 
-                   group = factor(accident_year), 
-                   color = factor(accident_year)))
-```
-
-Since we only observe reported claims, we observe less claims from recent accident years around the end of the year. Correct for this by filtering claims that are reported in the year of occurrence.
-
-```r
-ggplot(claims_covidB %&gt;%
-         filter(reporting_year == accident_year)) +
-  theme_bw() +
-  geom_density(aes(x = time, 
-                   group = factor(accident_year), 
-                   color = factor(accident_year)))
-```
-]
-
-.pull-right[
-
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-96-1.png)&lt;!-- --&gt;
-
-![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-97-1.png)&lt;!-- --&gt;
-]
-
----
-class: clear
-
-For .hi-pink[Q.2] computing the chain ladder reserve
-.pull-left[
-
-```r
-require(ChainLadder)
-triangleA &lt;- cumulative_triangle(observed_data_covidA, 
-                                variable = 'size')
-clA &lt;- MackChainLadder(triangleA)
-clA
-```
-.tiny[
-
-```
-## MackChainLadder(Triangle = triangleA)
-## 
-##       Latest Dev.To.Date  Ultimate      IBNR Mack.S.E CV(IBNR)
-## 1  1,619,982       1.000 1,619,982  0.00e+00 0.00e+00      NaN
-## 2  1,528,185       1.000 1,528,185  0.00e+00 1.44e-13      Inf
-## 3  1,608,274       1.000 1,608,274 -4.66e-10 3.54e-10   -0.761
-## 4  1,671,348       1.000 1,671,348 -4.66e-10 3.64e-10   -0.781
-## 5  1,684,656       1.000 1,684,656 -4.66e-10 3.66e-10   -0.785
-## 6  1,470,984       1.000 1,470,984 -4.66e-10 4.23e-10   -0.908
-## 7  1,640,175       0.999 1,641,391  1.22e+03 2.38e+03    1.962
-## 8  1,666,274       0.996 1,672,544  6.27e+03 4.74e+03    0.756
-## 9  1,615,375       0.987 1,636,318  2.09e+04 1.18e+04    0.561
-## 10   724,846       0.893   811,877  8.70e+04 3.14e+04    0.361
-## 
-##                  Totals
-## Latest:   15,230,099.47
-## Dev:               0.99
-## Ultimate: 15,345,559.70
-## IBNR:        115,460.23
-## Mack.S.E      34,373.24
-## CV(IBNR):          0.30
-```
-]
-]
-
-.pull-right[
-
-```r
-require(ChainLadder)
-triangleB &lt;- cumulative_triangle(observed_data_covidB, 
-                                variable = 'size')
-clB &lt;- MackChainLadder(triangleB)
-clB
-```
-.tiny[
-
-```
-## MackChainLadder(Triangle = triangleB)
-## 
-##       Latest Dev.To.Date  Ultimate      IBNR Mack.S.E CV(IBNR)
-## 1  4,835,633       1.000 4,835,633         0        0      NaN
-## 2  4,687,234       1.000 4,687,234         0    1,212      Inf
-## 3  5,192,025       1.000 5,193,916     1,892    3,398   1.7965
-## 4  4,769,571       0.999 4,773,326     3,755    5,225   1.3914
-## 5  4,765,606       0.999 4,771,681     6,074    7,422   1.2219
-## 6  4,852,924       0.998 4,861,338     8,414    8,249   0.9803
-## 7  4,782,048       0.996 4,799,125    17,077    9,690   0.5675
-## 8  4,607,266       0.989 4,656,956    49,690   19,630   0.3950
-## 9  4,644,426       0.967 4,804,801   160,374   39,868   0.2486
-## 10 3,138,005       0.640 4,902,249 1,764,244  132,487   0.0751
-## 
-##                  Totals
-## Latest:   46,274,737.36
-## Dev:               0.96
-## Ultimate: 48,286,257.75
-## IBNR:      2,011,520.39
-## Mack.S.E     144,671.48
-## CV(IBNR):          0.07
-```
-]
-]
-
----
-class: clear
-
-.pull-left[
-For .hi-pink[Q.3], we combine the estimated reserves from A and B
-
-
-```r
-ultimateA &lt;- sum(cum2incr(clA$FullTriangle))
-already_paidA &lt;- sum(cum2incr(clA$Triangle), na.rm = TRUE)
-reserveA &lt;-  ultimateA - already_paidA
-
-ultimateB &lt;- sum(cum2incr(clB$FullTriangle))
-already_paidB &lt;- sum(cum2incr(clB$Triangle), na.rm = TRUE)
-reserveB &lt;-  ultimateB - already_paidB
-
-reserve_covid_cl_split &lt;- reserveA + reserveB
-
-c(reserve_actual = reserve_covid_actual,
-  reserve_cl = reserve_covid_cl,
-  reserve_cl_split = reserve_covid_cl_split)
+reserve_group &lt;- sum(predict(fit, newdata = triangles %&gt;% filter(is.na(size)), type = 'response'))
+reserve_group
 ```
 
 ```
-##   reserve_actual       reserve_cl reserve_cl_split 
-##          2389277          1905100          2126981
-```
-
-Splitting the data results in a more accurate reserve estimate.
-
-]
-
-.pull-right[
-For .hi-pink[Q.4], we evaluate the relative performance of the model
-
-
-```r
-sigma = as.numeric(
-  sqrt(clA$Total.Mack.S.E^2 + clB$Total.Mack.S.E^2))
-
-data.frame(
-  method = c('chain ladder', 'chain ladder split'),
-  error = c(reserve_covid_cl - reserve_covid_actual,
-            reserve_covid_cl_split - reserve_covid_actual),
-  sigma = c(sigma_cl, sigma)) %&gt;%
-  mutate(pct_error = error / reserve_covid_actual * 100,
-         std.dev = error / sigma)
+## [1] 1928050
 ```
 
 
-|          | chain ladder| chain ladder split|
-|:---------|------------:|------------------:|
-|error     |   -484177.34|         -262296.65|
-|sigma     |    136795.35|          148698.88|
-|pct_error |       -20.26|             -10.98|
-|std.dev   |        -3.54|              -1.76|
+We obtain a similar reserve estimate as with the monthly chain ladder
 
-]
+```
+##                 method cells reserve.estimate     error pct.error
+## 1  Yearly chain ladder    66          1734146 -415165.1 -19.31619
+## 2 Monthly chain ladder  8778          1923173 -226139.0 -10.52146
+## 3 Grouped chain ladder   792          1928050 -221261.9 -10.29455
+```
+
 
 ---
 class: inverse, center, middle
@@ -2047,31 +1613,31 @@ name: research_outlook
 &lt;img src="image/reserving_methods.png" width="67%" style="display: block; margin: auto;" /&gt;
 
 ---
-# Development of a individual claims
+# Development of an individual claim
 
 &lt;br&gt;
 
 &lt;img src="image/development_claim.png" width="80%" style="display: block; margin: auto;" /&gt;
 
 ---
-# Development of a individual claims (continued)
+# Development of an individual claim (continued)
 
 &lt;img src="image/lexis_claim.png" width="60%" style="display: block; margin: auto;" /&gt;
 
-Observed claims are .hi-pink[censored] due to .hi-pink[delays] (reporting, settlement) in the claim development process
+Observed claims are .hi-pink[censored] due to .hi-pink[delays] (reporting, settlement) in the claim development process.
 
-.KULbginline[IBNR reserve]: future costs for claims that occurred, but are not yet reported (claim B) &lt;br&gt;
-.KULbginline[RBNS reserve]: future costs for claims that are reported, but are not yet settled (claim C) &lt;br&gt;
-.KULbginline[Pricing]: all costs for claims that will occur in .hi-pink[future] insured .hi-pink[exposure periods] (claim D)
+.KULbginline[IBNR]: future costs for claims that occurred, but are not yet reported (claim B) &lt;br&gt;
+.KULbginline[RBNS]: future costs for claims that are reported, but are not yet settled (claim C) &lt;br&gt;
+.KULbginline[Pricing]: all costs for claims that will occur in .hi-pink[future] insured .hi-pink[exposure periods] (claim D).
 
 ---
 # The IBNR reserve
 
 &lt;br&gt;
-Following a frequency-severity decomposition, the IBNR reserve is the product of the expected .hi-pink[number of unreported claims] times the .hi-pink[expected severity per claim].
+Following a frequency-severity decomposition, the IBNR reserve is the product of the expected .hi-pink[number of unreported claims] times the .hi-pink[expected severity per claim]. Hereby:
 
-* Insurance pricing covers the estimation of claim severity for new claims 
-* Reserving methods focus on predicting the .hi-pink[number of unreported claims].
+* insurance pricing covers the estimation of claim severity for new claims 
+* reserving methods focus on predicting the .hi-pink[number of unreported claims].
 
 &lt;br&gt;
 
@@ -2079,7 +1645,7 @@ Our work on the topic:
 
 * "Modeling the number of hidden events subject to observation delay". Jonas Crevecoeur, Katrien Antonio and Roel Verbelen. (2019). European Journal of Operational Research.
 
-* "Modeling the occurrence of events subject to a reporting delay via an EM algorithm". Roel Verbelen, Katrien Antonio, Gerda Claeskens and Jonas Crevecoeur. (2019). Submitted.
+* "Modeling the occurrence of events subject to a reporting delay via an EM algorithm". Roel Verbelen, Katrien Antonio, Gerda Claeskens and Jonas Crevecoeur. (2021). Statistical Science.
 
 ---
 # The IBNR reserve (continued)
@@ -2119,13 +1685,13 @@ Predict the future costs of individual, reported claims.
 &lt;br&gt;
 Our work on the topic:
 
-* "A hierarchical reserving model for non-life insurance claims". Jonas Crevecoeur and Katrien Antonio. (2020). Sumbitted.
+* "A hierarchical reserving model for non-life insurance claims". Jonas Crevecoeur and Katrien Antonio. (2021). Working paper, under review.
 
-* "Bridging the gap between pricing and reserving with an occurrence and development model for non-life insurance claims". Katrien Antonio and Jonas Crevecoeur. (2020). Working paper.
+* "Bridging the gap between pricing and reserving with an occurrence and development model for non-life insurance claims". Katrien Antonio and Jonas Crevecoeur. (2021). Working paper.
 
 &lt;br&gt;
 
-Methods implemented in the R package {hirem}, Hierarchical reserving models, available on [GitHub](https://github.com/jonascrevecoeur/hirem). 
+Methods implemented in the R package {hirem}, covering tools for hierarchical reserving models, available on [GitHub](https://github.com/jonascrevecoeur/hirem). 
 
 ---
 # The RBNS reserve (continued)
@@ -2143,18 +1709,19 @@ The hierarchical model is based on .hi-pink[two key ideas]:
 The hierarchical model is based on .hi-pink[two key ideas]:
 
 1. Model the development of indiviudal claim in discrete time (steps of one year) using the observed development in previous years.
+
 2. Focus on all events registered over the lifetime of a claim
 
 Common events registered over the lifetime of a claim:
 * settlement
 * payments
 * initial incurred / changes in the incurred
-* involvement lawyer
+* involvement lawyer.
 
 These events are .hi-pink[dependent]:
 
 * if a claim is .hi-pink[settled], there will be no .hi-pink[payments] in the future
-* large .hi-pink[payments] are more likely when the outstanding .hi-pink[reserve] is large
+* large .hi-pink[payments] are more likely when the outstanding .hi-pink[reserve] is large.
 
 ---
 # Implementation in the  {hirem} package

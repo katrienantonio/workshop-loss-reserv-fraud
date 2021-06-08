@@ -912,7 +912,7 @@ name: freq-sev approach
 
 * claim severity and claim frequency are independent
 
-* we ignore any additional covariates (cfr. workshop last year).
+* we ignore any additional covariates (more on that next week).
 
 
 ]
@@ -1122,7 +1122,7 @@ Let's make this more concrete for the Poisson distribution:
 `$$N_i \sim \texttt{Poi}(e_i \cdot \lambda).$$`
 The corresponding log-likelihood becomes: 
 
-$$\sum_i n_i \cdot \log(e_i \cdot \lambda) - e_i \cdot \lambda - n_i! $$
+`$$\sum_i n_i \cdot \log(e_i \cdot \lambda) - e_i \cdot \lambda - \log(n_i!).$$`
 How about .KULbginline[fitting a parametric count distribution] to data in R?
 
 ]
@@ -1239,7 +1239,7 @@ where `\(\texttt{expo}\)` refers to `expo` the exposure variable.
 
 ---
 
-# Maximum likelihood estimation (MLE) in R (continued)
+# Maximum likelihood estimation (MLE) in R (cont.)
 
 .pull-left[
 
@@ -1557,12 +1557,13 @@ The [library {pscl}](https://github.com/atahk/pscl) enables maximum likelihood e
 
 ```r
 library(pscl)
-f_ZIP &lt;- zeroinfl(nclaims ~ 1, offset = log(expo), 
+f_ZIP &lt;- pscl::zeroinfl(nclaims ~ 1, offset = log(expo), 
                   dist = "poisson", data = mtpl)
 summary(f_ZIP)
 ## 
 ## Call:
-## zeroinfl(formula = nclaims ~ 1, data = mtpl, offset = log(expo), dist = "poisson")
+## pscl::zeroinfl(formula = nclaims ~ 1, data = mtpl, offset = log(expo), 
+##     dist = "poisson")
 ## 
 ## Pearson residuals:
 ##     Min      1Q  Median      3Q     Max 
