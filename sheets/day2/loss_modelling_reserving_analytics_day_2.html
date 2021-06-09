@@ -129,7 +129,7 @@ then we aggregate these individual predictions to predict the total reserve.
 ---
 # Data set used in this session
 
-We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims between January 1, 2010 and December 31, 2019. Data is available in a daily and yearly format.
+We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims occurring between January 1, 2010 and December 31, 2020. Data is available in a daily and yearly format.
 
 .KULbginline[Daily] data:
 
@@ -163,20 +163,19 @@ reserving_daily &lt;- readRDS("data/reserving_data_daily.rds")
 ---
 # Data set used in this session
 
-We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims between January 1, 2010 and December 31, 2019. Data is available in a daily and yearly format.
+We illustrate reserving analytics based on a .hi-pink[simulated dataset] registering the .hi-pink[detailed development] of 30,000 claims occurring between January 1, 2010 and December 31, 2020. Data is available in a daily and yearly format.
 
-.KULbginline[Yearly] data:
+.KULbginline[Yearly] data with one record per claim per development year:
 
-* aggregated into one record per claim per development year.
+* for each development year the data registers:
+  * close is 1 when the claim closes in the current development year, 0 otherwise
+  * payment is 1 when there is at least one payment, 0 otherwise
+  * size: total amount paid for the claim in the current development year
 
 The data is stored in a .rds file in the `data` directory in the course material:
 
 
 ```r
-# install.packages("rstudioapi")
-dir &lt;- dirname(rstudioapi::getActiveDocumentContext()$path)
-setwd(dir)
-
 reserving_yearly &lt;- readRDS("data/reserving_data_yearly.rds")
 ```
 
@@ -239,7 +238,7 @@ ggplot(data = reserving_daily) +
 ]
 
 .pull-right[
-For .hi-pink[Q.2] the last payment was in 2024, i.e. the simulated data is not yet censored!
+For .hi-pink[Q.2] the last payment was in 2025, i.e. the simulated data is not yet censored!
 
 
 ```r
@@ -310,7 +309,7 @@ We apply the filter `development_year == 1` to count each claim only once. Claim
 # Censoring the data
 
 &lt;br&gt;
-The simulated data is not censored, i.e. we observe the full development of all claims that occur before the end of 2019.&lt;br&gt;
+The simulated data is not censored, i.e. we observe the full development of all claims that occur before the end of 2020.&lt;br&gt;
 In practice the available data set will be censored and we will only observe: 
 
 * reported claims
@@ -752,10 +751,10 @@ MackChainLadder(triangle)
 ]
 ]
 .pull-right[
-`Latest`: Amount already paid &lt;br&gt;
-`Ultimate`: Estimated total amount (= amount paid + reserve) &lt;br&gt;
-`IBNR`: Estimated total reserve, IBNR + RBNS! &lt;br&gt;
-`Mack.S.E`: Estimated standard deviation of the reserve
+`Latest`: amount already paid &lt;br&gt;
+`Ultimate`: estimated total amount (= amount paid + reserve) &lt;br&gt;
+`IBNR`: estimated total reserve, IBNR + RBNS! &lt;br&gt;
+`Mack.S.E`: estimated standard deviation of the reserve.
 ]
 
 ---
@@ -940,7 +939,7 @@ class: clear
 .right-column[
 
 &lt;br&gt;
-We have demonstrated the estimation of the reserve (future amount paid). In this exercise you will use the same techniques to estimate the number of future payments.
+We have demonstrated the estimation of the reserve (future amount paid). In this exercise you will use the same techniques to estimate the number of future development years with at least one payment. Use the yearly data set `reserving_yearly` for this exercise. 
 
 1. Compute the actual number of future payments from the unobserved data set.
 
@@ -1113,7 +1112,7 @@ name: chainladderfail
 # Detecting when the chain ladder method fails
 
 The chain ladder method assumes that claims from all occurrence years follow the .hi-pink[same development pattern]. &lt;br&gt; 
-We construct various triangles to assess this assumption:
+We construct various triangles to assess this assumption.
 
 .pull-left[
 Number of open claims at the start of the year:
@@ -1150,7 +1149,7 @@ Number of open claims at the end of the year:
 ```r
 triangle_open_end &lt;- incremental_triangle(
   observed_yearly %&gt;%
-    mutate(open_end = (calendar_year &lt;= settlement_year) &amp; (close == 0)),
+    mutate(open_end = (calendar_year &lt; settlement_year)),
   variable = 'open_end')
 triangle_open_end
 ```
@@ -1182,7 +1181,7 @@ The chain ladder method assumes that claims from all occurrence years follow the
 We construct various triangles to assess this assumption:
 
 .pull-left[
-Percentage of open claims for which a payment is made.
+Percentage of claims open at the start of the year for which a payment is made:
 
 ```r
 triangle_payment &lt;- incremental_triangle(
@@ -1211,7 +1210,7 @@ triangle_payment / triangle_open
 ]
 
 .pull-right[
-Average amount paid given a payment is made.
+Average amount paid given a payment is made:
 
 ```r
 triangle_size &lt;- incremental_triangle(
@@ -1248,6 +1247,7 @@ We inspect the (granular) daily claims data:
 .pull-left[
 
 ```r
+# Select one observation per claim
 claims &lt;- observed_daily %&gt;%
   group_by(accident_number) %&gt;%
   slice(1) %&gt;%
@@ -1274,7 +1274,7 @@ ggplot(occ_intensity) +
 .pull-right[
 ![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-60-1.png)&lt;!-- --&gt;
 
-The moving average indicates a period with decreased claim frequency in 2020.
+The moving average indicates a period with decreased claim occurrence intensity in 2020.
 
 ]
 
@@ -1301,6 +1301,7 @@ ggplot(claims) +
                    group = factor(accident_year), 
                    color = factor(accident_year)))
 ```
+We apply `filter(accident_year == reporting_year)` such that the same amount of information is available for all occurrence years.
 ]
 
 
@@ -1316,36 +1317,42 @@ The occurrence intensity in accident year 2020 deviates from the other accident 
 ---
 # Detecting when the chain ladder method fails
 
-The data contains a drop in claim frequency during March-June 2020. 
-
-This emulates a situation were .hi-pink[less claims occurred] due to the first .hi-pink[COVID-19 lockdown]. Such changes in the claim occurrence and development pattern can severly impact chain ladder performance.
+The data contains a drop in claim frequency during March, April, May 2020, with .hi-pink[less claims occurring] due to the first .hi-pink[COVID-19 lockdown]. Such changes in the claim occurrence and development pattern can severly impact chain ladder performance.
 
 Other situations that might impact the performance of the chain ladder are:
 
-* Inflation: 
+.pull-left[
+
+* inflation: 
+
+  * to be detected via the triangle `size`
+  
+* changing product mix: 
+
+  * to be detected via the triangles `close`, `payment` and `size`
+  
+* internal changes in claim handling: 
+
+  * to be detected via the triangles `close` and `payment`
+]
+
+.pull-right[
+  
+* extreme weather events: 
+
+  * to be detected via the yearly distribution of occurrence dates
+  
+* an extremely large claim:
 
   * to be detected via the triangle `size`.
   
-* Changing product mix: 
-
-  * to be detected via the triangles `close`, `payment` and `size`.
-  
-* Internal changes in claim handling: 
-
-  * to be detected via the triangles `close` and `payment`.
-  
-* Extreme weather events: 
-
-  * to be detected via the yearly distribution of occurrence dates.
-  
-* An extremely large claim:
-
-  * to be detected via the triangle `size`.
+]
 
 ---
 # Fixing the chain ladder method
-&lt;br&gt;
-Improve the performance of the chain ladder method by making the .hi-pink[data more homogeneous]:
+
+.pull-left[
+Making the .hi-pink[data more homogeneous] using:
 
 * .hi-pink[group] claims by:
 
@@ -1361,10 +1368,9 @@ Improve the performance of the chain ladder method by making the .hi-pink[data m
   * inflation.
   
 The appropriate method(s) depend on the data inspection from the previous slides.
+]
 
----
-# Fixing the chain ladder method (continued)
-
+.pull-right[
 Applied to the .hi-pink[COVID-19 reserving data set]:
 
 * claim frequency has changed in the months March, April, May
@@ -1372,15 +1378,16 @@ Applied to the .hi-pink[COVID-19 reserving data set]:
 
 As 2020 is a recent calendar year, we cannot omit accident year 10 from the data.
 
-We illustrate three approaches to improve the homogeneity across the accident years:
+We illustrate two approaches to improve the homogeneity across the accident years:
 
 * applying the chain ladder method to more granular data
 * grouping claims by occurrence month.
+]
 
 ---
 # Monthly chain ladder
 
-A more .hi-pink[granular chain ladder] is more .hi-pink[robust] to .hi-pink[fluctuations in the occurrence process].
+A more .hi-pink[granular chain ladder] offers more flexibility/parameters to capture fluctuations in the .hi-pink[fluctuations in the occurrence process].
 
 .pull-left[
 
@@ -1407,7 +1414,7 @@ ggplot(claims) +
 
 
 .pull-right[
-Within each month the claim occurrence density looks similar:
+We compare the distribution of claim occurrences within each calendar month.
 
 ![](loss_modelling_reserving_analytics_day_2_files/figure-html/unnamed-chunk-64-1.png)&lt;!-- --&gt;
 
@@ -1416,8 +1423,8 @@ In real (non simulated) data, these monthly densities might be disturbed by seas
 
 ---
 # Monthly chain ladder
-
-Construct a .hi-pink[monthly triangle] using the observed daily data:
+&lt;br&gt;
+Example code to construct a .hi-pink[monthly triangle] using the observed daily data:
 
 
 ```r
@@ -1438,7 +1445,7 @@ triangle_month &lt;- as.matrix(triangle_month[, 2:132])
 
 ---
 # Monthly chain ladder
-
+&lt;br&gt;
 
 
 ```r
@@ -1470,7 +1477,7 @@ The monthly chain ladder predicts the reserve more accurately on this data set.
 ---
 # Grouping claims by occurrence month
 
-We group claims based on the occurrence month and estimate a .hi-pink[separate yearly chain ladder] for each of these groups.
+We group claims based on the occurrence month. For each of these groups we construct a .hi-pink[separate runoff triangle] and estimate the reserve using a .hi-pink[yearly chain ladder].
 
 .pull-left[
 
@@ -1573,7 +1580,7 @@ triangles %&gt;%
 We use the `glm` routine to apply the chain ladder method to each triangle:
 
 
-`factor(development_year) : accident_month` estimates a different effect `factor(development)` for each `accident_month`
+`factor(development_year) * accident_month` estimates a different effect `factor(development)` for each `accident_month`
 
 ```r
 fit &lt;- glm(size ~ factor(development_year) * accident_month  + factor(accident_year) * accident_month,
@@ -1589,7 +1596,7 @@ reserve_group
 ```
 
 
-We obtain a similar reserve estimate as with the monthly chain ladder
+We obtain a reserve estimate similar to the one obtained with the monthly chain ladder
 
 ```
 ##                 method cells reserve.estimate     error pct.error
