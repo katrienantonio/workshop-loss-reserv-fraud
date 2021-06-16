@@ -61,7 +61,7 @@ The detailed schedule is subject to small changes.
 |         | 4.15 - 4.50 | Claims reserving with triangles | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)
 |         | 5 - 5.45 | When the chain ladder method fails | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail)  and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)
 |         | 5.45 - 6| Research outlook  | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)
-| Day 3   | 3 - 3.30  | Motivation and fraud detection cycle | sheets in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-05-31 K Antonio Insurance Fraud Analytics_print.pdf)
+| Day 3   | 3 - 3.30  | Motivation and fraud detection cycle | sheets in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-06-17 K Antonio Insurance Fraud Analytics_print.pdf)
 |         | 3.30 - 3.50 | Network and tabular data | 
 |         | 4 - 4.30 | Ranking algorithm |  
 |         | 4.30 - 4.50 | Featurization | 
@@ -104,7 +104,7 @@ Topics include:
 - evaluation metrics, eg AUROC, AUPR, top decile lift
 - wrap up.
 
-Download lecture sheets [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-05-31 K Antonio Insurance Fraud Analytics_print.pdf).
+Download lecture sheets [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-06-17 K Antonio Insurance Fraud Analytics_print.pdf).
 
 ## Prework
 

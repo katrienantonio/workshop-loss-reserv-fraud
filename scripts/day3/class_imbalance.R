@@ -4,10 +4,10 @@
 
 library(caret)
 library(kernlab)
-library(DMwR)
+library(performanceEstimation)
 library(tidyverse)
 
-? ticdata  # now that is a nice Dutch data set ;-)
+?ticdata  # now that is a nice Dutch data set ;-)
 
 data(ticdata)
 
@@ -65,10 +65,11 @@ table(up_sampled$Class)  # do you recognize the number?
 
 # SMOTE
 set.seed(1237)
-smoted <- DMwR::SMOTE(CARAVAN ~ ., data = training)
+smoted <- smote(CARAVAN ~ ., data = training)
 table(smoted$CARAVAN)
 
 # SMOTE has some parameters that can be used like this (see ? SMOTE)
-smoted_2 <- DMwR::SMOTE(CARAVAN ~ . , data = training, k = 5, perc.over = ___)
+smoted_2 <- smote(CARAVAN ~ . , data = training, k = 5, perc.over = ___)
 
 # now start building your classifier on the rebalanced data, BUT evaluate on the test!
+

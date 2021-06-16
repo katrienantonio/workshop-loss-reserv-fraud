@@ -6,7 +6,7 @@ by Katrien Antonio and Jonas Crevecoeur
 Course materials for the online *Loss Modelling, Reserving and Insurance
 Fraud Analytics* course in June 2021.
 
-📆 June 3, 10 & 17 2021 <br> 🕥 From 3pm to 6pm <br> 📌 online via MS Teams
+📆 June 3, 10 & 17 2021 <br> 🕘 From 3pm to 6pm <br> 📌 online via MS Teams
 
 Course materials will be posted in the days before the workshop.
 
@@ -69,7 +69,7 @@ The detailed schedule is subject to small changes.
 |         | 4.15 - 4.50   | Claims reserving with triangles                                    | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladder) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)            |
 |         | 5 - 5.45      | When the chain ladder method fails                                 | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#chainladderfail) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)        |
 |         | 5.45 - 6      | Research outlook                                                   | sheets in [html](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.html#research_outlook) and [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day2/loss_modelling_reserving_analytics_day_2.pdf)       |
-|  Day 3  | 3 - 3.30      | Motivation and fraud detection cycle                               | sheets in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-05-31%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf)                                                                                                                                    |
+|  Day 3  | 3 - 3.30      | Motivation and fraud detection cycle                               | sheets in [pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-06-17%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf)                                                                                                                                    |
 |         | 3.30 - 3.50   | Network and tabular data                                           |                                                                                                                                                                                                                                                                                                |
 |         | 4 - 4.30      | Ranking algorithm                                                  |                                                                                                                                                                                                                                                                                                |
 |         | 4.30 - 4.50   | Featurization                                                      |                                                                                                                                                                                                                                                                                                |
@@ -123,7 +123,7 @@ Topics include:
   - wrap up.
 
 Download lecture sheets
-[pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-05-31%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf).
+[pdf](https://katrienantonio.github.io/workshop-loss-reserv-fraud/sheets/day3/2021-06-17%20K%20Antonio%20Insurance%20Fraud%20Analytics_print.pdf).
 
 ## Prework
 
